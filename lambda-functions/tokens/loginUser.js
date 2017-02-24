@@ -36,10 +36,18 @@ exports.handler = function(req, context, callback) {
     async.waterfall([
         function(next) {
             authenticate(body, next);
-        }, function(user, next) {
+        },
+        function(user, next) {
             checkTokenBucket(user, next);
-        }, function(user, next) {
-            insertToken(user, next);
+        },
+        function(user, next) {
+            insertToken(user, function(err, response) {
+                if (err) {
+                    next(err);
+                } else {
+                    callback(null, response);
+                }
+            });
         }
     ], function(err) {
         callback(err);
@@ -54,7 +62,7 @@ exports.handler = function(req, context, callback) {
  */
 function authenticate(body, callback) {
     if (typeof body.email !== 'string' ||
-            typeof body.password !== 'string') {
+        typeof body.password !== 'string') {
         response = {
             status: 400,
             message: "Both the email and password given must be of type string."
@@ -155,10 +163,11 @@ function checkTokenBucket(user, callback) {
         } else {
             console.log("Scanned tokens successfully. JSON: ",
                 JSON.stringify(data, null, 2));
-            if(data.Items.length < 100) {
+            if (data.Count < 100) {
                 var time = Math.round((new Date().getTime() / 1000) - 3);
-                data.Items.forEach(function(token) {
-                    if(token.last_use >= time) {
+                for (var i; i < data.Count; i++) {
+                    var token = data.Items[i];
+                    if (token.last_use >= time) {
                         var response = {
                             status: 401,
                             message: "Unauthorized to generate more than 1 token " +
@@ -168,7 +177,9 @@ function checkTokenBucket(user, callback) {
                         callback(401, response);
                         return;
                     }
-                })
+                }
+
+                callback(null, user);
             } else {
                 var response = {
                     status: 401,
@@ -188,9 +199,10 @@ function checkTokenBucket(user, callback) {
  * @return the generated token.
  */
 function insertToken(user, callback) {
+    console.log("o hai");
     var table = "rec_center_tokens";
     var token = generateToken(user, 'authentication');
-    if(token) {
+    if (token) {
         var hash = cryptojs.MD5(token).toString();
         var time = Math.round(new Date().getTime() / 1000);
 

@@ -306,7 +306,7 @@ function s3Upload(b64String, id, name, callback) {
 
         var bucket = "cbu-rec-center-app";
         var key = "app/images/users/" + id + "/" +
-            (name ? encodeURI(data.name.replace(" ", "-")) + "-" : "") +
+            (name ? encodeURI(name.replace(" ", "-")) + "-" : "") +
             "uncompressed.jpg";
         var contentType = "image/jpeg";
         var acl = "public-read";
@@ -324,7 +324,7 @@ function s3Upload(b64String, id, name, callback) {
                 } else {
                     // Increment until all 4 operation have executed.
                     uploadCount++;
-                    if (uploadCount == 4) {
+                    if (uploadCount == 3) {
                         callback(null);
                     }
                 }
@@ -334,7 +334,7 @@ function s3Upload(b64String, id, name, callback) {
         for (var compressedSize = 400; compressedSize > 0; compressedSize -= 300)
             (function(compressedSize) {
                 key = "app/images/users/" + id + "/" +
-                    (name ? encodeURI(data.name.replace(" ", "-")) + "-" : "") +
+                    (name ? encodeURI(name.replace(" ", "-")) + "-" : "") +
                     compressedSize + "px.jpg";
 
                 // Compress and upload the image
@@ -354,7 +354,7 @@ function s3Upload(b64String, id, name, callback) {
 
                         // Increment until all 4 operations have executed.
                         uploadCount++;
-                        if (uploadCount == 4) {
+                        if (uploadCount == 3) {
                             callback(null);
                         }
                     });
@@ -382,7 +382,7 @@ function compressAndUploadImg(imgBuffer, compressedSize,
                 });
         },
         function upload(newBuffer, next) {
-            uploadImg(bucket, key, contentType, imgBuffer, acl, function(err) {
+            uploadImg(bucket, key, contentType, newBuffer, acl, function(err) {
                 next(err);
             });
         }
