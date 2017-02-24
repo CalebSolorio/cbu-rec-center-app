@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
-import Header from '../src/Components/Header'
+import Header from '../Components/Header'
 
 export default class Home extends Component {
   render() {
