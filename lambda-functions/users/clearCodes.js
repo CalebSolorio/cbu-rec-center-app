@@ -1,35 +1,39 @@
-console.log('Loading ClearTokens function...');
+console.log('Loading resendCode function...');
 
 /*
-    This removes unused tokens from DynamoDB.
+    Recreates an existing code and sends it to the specified email.
 
-    Use aws to communicate with DynamoDB,
+    Use AWS to communicate with other AWS services,
+    asyc for asynchronus tasks,
+    and bcryptjs for code hashing,
 */
 
-var aws = require('aws-sdk');
+var aws = require("aws-sdk");
+var async = require("async");
+var bcrypt = require('bcryptjs');
 
 // Establish a connection to DynamoDB
 aws.config.update({
-    region: "us-east-1"
+    region: "us-east-1",
 });
 
-// Establish a connection with DynamoDB
+// Establish connection with DynamoDB.
 var docClient = new aws.DynamoDB.DocumentClient();
 
 exports.handler = function(event, context, callback) {
-    // Initialize variables needed later
-    var table = "rec_center_tokens";
+    var table = "rec_center_codes";
 
-    // Get the time from 14 days ago
-    var time = Math.round(new Date().getTime() / 1000) - ((24 * 60 * 60) * 14);
+    // Get the time from 24 hours ago.
+    var time = Math.round(new Date().getTime() / 1000) - (24 * 60 * 60);
 
     // Prepare the query
     var params = {
         TableName: table,
-        FilterExpression: "last_use < :t",
+        FilterExpression: "updated_at < :t",
         ExpressionAttributeValues: {
             ":t": time,
-        }
+        },
+        Limit: 1
     };
 
     // Execute the query
@@ -37,18 +41,18 @@ exports.handler = function(event, context, callback) {
         if (err) {
             var response = {
                 status: 500,
-                message: "Unable to scan tokens"
+                message: "Unable to scan for old codes :(",
             };
             context.fail(JSON.stringify(response));
         } else {
-            if(data.Count > 0) {
+            if(data.Items.length > 0) {
                 var count = 0;
                 data.Items.forEach(function(item, index) {
                     // Set to delete tokens more than 30 days old
                     params = {
                         TableName: table,
                         Key: {
-                            token_hash: item.token_hash
+                            email: item.email
                         },
                         Limit: 1,
                     };
@@ -58,20 +62,19 @@ exports.handler = function(event, context, callback) {
                         if (err) {
                             var response = {
                                 status: 500,
-                                message: "Unable to delete token"
+                                message: "Unable to delete tokens :(",
                             };
                             context.fail(JSON.stringify(response));
                         } else {
                             count++;
-                            if(count == data.Count) {
-                                context.succeed({ status: 200,
-                                        tokensDeleted: data });
+                            if(count == data.Items.lenth) {
+                                context.succeed();
                             }
                         }
                     });
                 });
             } else {
-                context.succeed({ status: 200 });
+                context.succeed();
             }
         }
     });

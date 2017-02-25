@@ -19,7 +19,11 @@ aws.config.update({
 
 exports.handler = function(event, context, callback) {
     codeMatch(event.email, event.code, function(err, matches) {
-        callback(err, matches);
+        if(err) {
+            context.fail(JSON.stringify(err));
+        } else {
+            context.succeed(matches);
+        }
     });
 };
 
@@ -45,13 +49,15 @@ function codeMatch(email, code, callback) {
     // Get the associated code and compare code hash with the code given.
     docClient.get(params, function(err, data) {
         if (err) {
-            console.error("Unable to scan the table. Error JSON:",
-                JSON.stringify(err));
-            callback(err);
+            var response = {
+                status: 500,
+                message: "Unable to scan for codes :("
+            };
+            callback(response);
         } else {
-            console.log("Item JSON:", data.Item);
-            callback(null, data.Item ?
-              bcrypt.compareSync(code, data.Item.code_hash) : false);
+            var result = data.Item ?
+                bcrypt.compareSync(code, data.Item.code_hash) : false;
+            callback(null, result);
         }
     });
 }
