@@ -1,7 +1,8 @@
 console.log('Loading postUser function...');
 
 /*
-    Checks if the given code matches with the hashedCode.
+    Inserts a new user into the database and uploads their
+    media files to S3.
 
     Use aws to communicate with other AWS services,
     underscore to parse payload data,
@@ -35,7 +36,7 @@ exports.handler = function(event, context, callback) {
 
     if (data.email && data.password && event.code) {
         if (data.password.length >= 6 && data.password.length <= 128 &&
-            data.name.length > 2 && data.name.length <= 128 &&
+            data.name.length >= 2 && data.name.length <= 128 &&
             data.description.length <= 250) {
             // Verify that the code matches the hased code in DynamoDB, then upload.
             codeMatch(data.email, event.code, function(err, matches) {

@@ -181,7 +181,6 @@ function checkTokenBucket(user, callback) {
  * @return the generated token.
  */
 function insertToken(user, callback) {
-    console.log("o hai");
     var table = "rec_center_tokens";
     var token = generateToken(user, 'authentication');
     if (token) {
@@ -239,11 +238,9 @@ function generateToken(user, type) {
             id: user.id,
             type: type
         });
-        var encryptedData = cryptojs.AES.encrypt(stringData,
-            'rhS@%vQP28!d"HPR').toString();
-        var token = jwt.sign({
-            token: encryptedData
-        }, 'YTm=3rC6U6]3Y$eX');
+
+        var encryptedData = cryptojs.AES.encrypt(JSON.stringify(stringData),'rhS@%vQP28!d"HPR').toString();
+        var token = jwt.sign(encryptedData, 'YTm=3rC6U6]3Y$eX');
 
         return token;
     } catch (e) {
