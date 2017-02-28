@@ -1,18 +1,18 @@
 console.log('Loading authenticateUser function...');
 
 /*
-    This is an authenticator that will run before
-    any manipulation of DynamoDB or S3 takes place.
+    This is an authenticator that will run before any
+    manipulation of an established user's data takes place.
 
-    Use AWS to communicate with DynamoDB,
+    Use aws to communicate with DynamoDB,
     cryptojs for comparing tokens.
 */
 
-var AWS = require("aws-sdk");
+var aws = require("aws-sdk");
 var cryptojs = require('crypto-js');
 
 // Establish a connection to DynamoDB
-AWS.config.update({
+aws.config.update({
     region: "us-east-1",
 });
 
@@ -22,7 +22,7 @@ exports.handler = function(event, context, callback) {
 
     // Find a hashed token that matches the clients.
     if (token !== undefined) {
-        var docClient = new AWS.DynamoDB.DocumentClient();
+        var docClient = new aws.DynamoDB.DocumentClient();
         var table = "rec_center_tokens";
         var hashedToken = cryptojs.MD5(token).toString();
 
@@ -38,43 +38,40 @@ exports.handler = function(event, context, callback) {
         // Execute the query
         docClient.get(params, function(err, data) {
             if (err) {
-                console.error("Unable to read item. Error JSON:",
-                    JSON.stringify(err, null, 2));
                 var response = {
                     status: 500,
-                    message: "Unable to get user's profile"
+                    message: "Unable to get the user's profile :("
                 };
-
-                context.fail(response);
+                context.fail(JSON.stringify(response));
             } else {
-                console.log("Queried successfully:",
-                    JSON.stringify(data, null, 2));
                 if (data.Item !== undefined) {
-                    var principalId = "user";
+                    var principalId = "User";
                     var effect = "Allow";
                     var resource = "arn:aws:execute-api:us-east-1:372695149422:7um0hkzst5/*";
                     var policy = generatePolicy(principalId, effect, resource);
 
                     updateToken(docClient, table, hashedToken, function(err) {
                         if(err) {
-                            context.fail(err);
+                            context.fail(JSON.stringify(err));
                         } else {
                             context.succeed(policy);
                         }
-                    })
+                    });
                 } else {
                     var response = {
                         status: 401,
                         message: "Not a valid token. Access Denied."
                     };
-
-                    context.fail(response);
+                    context.fail(JSON.stringify(response));
                 }
             }
         });
     } else {
-        console.log("Token undefined");
-        context.fail("No token given.");
+        var response = {
+            status: 400,
+            message: "No token provided"
+        };
+        context.fail(JSON.stringify(response));
     }
 };
 
@@ -105,7 +102,7 @@ function generatePolicy(principalId, effect, resource) {
 }
 
 /**
- * Updates a token's last_use attribute to the current time
+ * Updates a token's last_use attribute to the current time.
  *
  * @param {string} docClient The DynamoDB client.
  * @param {string} table The name of the table to alter data in.
@@ -128,15 +125,12 @@ function updateToken(docClient, table, hashedToken, callback) {
 
     docClient.update(params, function(err, data) {
         if (err) {
-            console.error("Unable to update item. Error JSON:", JSON.stringify(err));
             var response = {
                 status: 500,
-                message: "Unable to update token"
+                message: "Unable to update token :("
             };
-
             callback(response);
         } else {
-            console.log("UpdateItem succeeded:", JSON.stringify(data));
             callback(null);
         }
     });

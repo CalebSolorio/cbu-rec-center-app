@@ -1,7 +1,8 @@
 console.log('Loading postUser function...');
 
 /*
-    Checks if the given code matches with the hashedCode.
+    Inserts a new user into the database and uploads their
+    media files to S3.
 
     Use aws to communicate with other AWS services,
     underscore to parse payload data,
@@ -35,21 +36,24 @@ exports.handler = function(event, context, callback) {
 
     if (data.email && data.password && event.code) {
         if (data.password.length >= 6 && data.password.length <= 128 &&
-            data.name.length > 2 && data.name.length <= 128 &&
+            data.name.length >= 2 && data.name.length <= 128 &&
             data.description.length <= 250) {
             // Verify that the code matches the hased code in DynamoDB, then upload.
             codeMatch(data.email, event.code, function(err, matches) {
                 if (err) {
-                    callback(err);
+                    context.fail(JSON.stringify(err));
                 } else {
                     if (matches) {
                         uploadData(event.image, data, function(err) {
-                            response = {
-                                status: 200,
-                                message: "Profile created for " + data.name + "!"
-                            };
-                            console.log(JSON.stringify(err));
-                            callback(err, response);
+                          if(err) {
+                              context.fail(JSON.stringify(err));
+                          } else {
+                              var response = {
+                                  status: 200,
+                                  message: "Profile created for " + data.name + "!"
+                              };
+                              context.succeed(response);
+                          }
                         });
                     } else {
                         response = {
@@ -58,7 +62,7 @@ exports.handler = function(event, context, callback) {
                                 "verification code and try again."
                         };
 
-                        callback(401, response);
+                        context.fail(JSON.stringify(response));
                     }
                 }
             });
@@ -71,7 +75,7 @@ exports.handler = function(event, context, callback) {
                     "250 characters."
             };
 
-            callback(403, response);
+            context.fail(JSON.stringify(response));
         }
 
     } else {
@@ -80,7 +84,7 @@ exports.handler = function(event, context, callback) {
             message: "Email and password, and verification code must be provided"
         };
 
-        callback(400, response);
+        context.fail(JSON.stringify(response));
     }
 };
 
@@ -103,11 +107,12 @@ function codeMatch(email, code, callback) {
     // Get the associated code and compare code hash with the code given.
     docClient.get(params, function(err, data) {
         if (err) {
-            console.error("Unable to scan the table. Error JSON:",
-                JSON.stringify(err));
-            callback(err);
+            var response = {
+                status: 500,
+                message: "Unable to scan verification codes :("
+            };
+            callback(response);
         } else {
-            console.log("Item JSON:", data.Item);
             callback(null, data.Item && code ?
                 bcrypt.compareSync(code, data.Item.code_hash) : false);
         }
@@ -122,27 +127,6 @@ function codeMatch(email, code, callback) {
  */
 function uploadData(userImage, userData, callback) {
     async.waterfall([
-        function deleteCode(next) {
-            // Specify the code to be deleted.
-            var params = {
-                TableName: "rec_center_codes",
-                Key: {
-                    "email": userData.email,
-                },
-            };
-
-            // Delete the code from DynamoDB.
-            docClient.delete(params, function(err, data) {
-                if (err) {
-                    console.error("Unable to delete officer from DynamoDB. Error JSON:",
-                        JSON.stringify(err));
-                } else {
-                    console.log("Successfully deleted code from DynamoDB!");
-                }
-
-                next(err);
-            });
-        },
         function prepare(next) {
             var uploadData = userData;
 
@@ -177,8 +161,6 @@ function uploadData(userImage, userData, callback) {
             if (userImage) {
                 s3Upload(userImage, uploadData.id, uploadData.name, function(err) {
                     if (err) {
-                        console.log("Error uploading to S3, JSON:",
-                            JSON.stringify(err));
                         next(err);
                     } else {
                         uploadCount++;
@@ -191,6 +173,27 @@ function uploadData(userImage, userData, callback) {
                 uploadCount++;
             }
 
+        }, function deleteCode(next) {
+            // Specify the code to be deleted.
+            var params = {
+                TableName: "rec_center_codes",
+                Key: {
+                    "email": userData.email,
+                },
+            };
+
+            // Delete the code from DynamoDB.
+            docClient.delete(params, function(err, data) {
+                if (err) {
+                    var response = {
+                        status: 500,
+                        message: "Unable to delete code : ("
+                    };
+                    next(response);
+                } else {
+                    next(null);
+                }
+            });
         }
     ], function(err) {
         callback(err);
@@ -205,20 +208,22 @@ function uploadData(userImage, userData, callback) {
  * @return {String} the hashed password.
  */
 function hashPassword(password, callback) {
-    console.log("hashing password");
     bcrypt.genSalt(10, function(saltErr, salt) {
         if (saltErr) {
-            console.log("Error generating salt. Error JSON: " +
-                JSON.stringify(saltErr));
-            callback(saltErr);
+            var response = {
+                status: 500,
+                message: "Unable to generate salt :("
+            };
+            callback(response);
         } else {
             bcrypt.hash(password, salt, function(hashErr, hashedPassword) {
                 if (hashErr) {
-                    console.log("Error hashing password. Error JSON: " +
-                        JSON.stringify(err));
-                    callback(hashErr);
+                    var response = {
+                        status: 500,
+                        message: "Unable to hash password :("
+                    };
+                    callback(response);
                 } else {
-                    console.log("Hashed password:", hashedPassword);
                     callback(null, hashedPassword);
                 }
             });
@@ -246,18 +251,18 @@ function dynamoDbUpload(item, callback) {
 
     docClient.scan(params, function(err, data) {
         if (err) {
-            console.error("Unable to scan the table. Error JSON:",
-                JSON.stringify(err));
             var response = {
                 status: 500,
-                message: "Unable to scan users"
-            }
-            callback(500, response);
+                message: "Unable to scan users :("
+            };
+            callback(response);
         } else {
-            // print all the movies
-            console.log("Scan succeeded.");
             if (data.Items.length > 0) {
-                callback(403);
+                var response = {
+                    status: 403,
+                    message: "This user already exists."
+                };
+                callback(response);
             } else {
                 params = {
                     TableName: table,
@@ -267,13 +272,11 @@ function dynamoDbUpload(item, callback) {
                 // Insert the user's data.
                 docClient.put(params, function(err) {
                     if (err) {
-                        console.log("Error uploading to DynamoDB, JSON:",
-                            JSON.stringify(err));
                         var response = {
                             status: 500,
-                            message: "Unable to insert new user"
-                        }
-                        callback(500, response);
+                            message: "Unable to insert new user :("
+                        };
+                        callback(response);
                     } else {
                         callback(null);
                     }
@@ -296,9 +299,8 @@ function s3Upload(b64String, id, name, callback) {
     if (!matches || matches.length !== 3) {
         response = {
             status: 403,
-            message: "Image data must be is base64 format"
+            message: "Image data must be is base64 format."
         };
-
         callback(response);
     } else {
         // Assign the base64 string of the picture to a buffer
@@ -317,8 +319,6 @@ function s3Upload(b64String, id, name, callback) {
             imgBuffer, acl,
             function(err) {
                 if (err) {
-                    console.error("Unable to upload uncompressed image. " +
-                        "Error JSON:", err);
                     callback(err);
                     return;
                 } else {
@@ -342,20 +342,14 @@ function s3Upload(b64String, id, name, callback) {
                     contentType, bucket, key, acl,
                     function(err) {
                         if (err) {
-                            console.log("Image " + compressedSize +
-                                "px compression/upload unsucessful. " +
-                                "Error JSON:", err);
                             callback(err);
                             return;
                         } else {
-                            console.log("Image " + compressedSize +
-                                "px compression/upload successful!");
-                        }
-
-                        // Increment until all 4 operations have executed.
-                        uploadCount++;
-                        if (uploadCount == 3) {
-                            callback(null);
+                            // Increment until all 4 operations have executed.
+                            uploadCount++;
+                            if (uploadCount == 3) {
+                                callback(null);
+                            }
                         }
                     });
             })(compressedSize);
@@ -378,7 +372,7 @@ function compressAndUploadImg(imgBuffer, compressedSize,
         function compress(next) {
             compressImg(imgBuffer, compressedSize, contentType,
                 function(err, newBuffer) {
-                    next(null, newBuffer);
+                    next(err, newBuffer);
                 });
         },
         function upload(newBuffer, next) {
@@ -403,7 +397,11 @@ function compressImg(imgBuffer, compressedSize, contentType, callback) {
     // Get image size.
     gm(imgBuffer).size(function(err, size) {
         if (err) {
-            callback(err);
+            var response = {
+                status: 500,
+                message: "Unable to size image : ("
+            };
+            callback(response);
         } else {
             // Infer the scaling factor to avoid stretching the image unnaturally.
             var scalingFactor = Math.min(
@@ -418,9 +416,12 @@ function compressImg(imgBuffer, compressedSize, contentType, callback) {
             gm(imgBuffer).resize(width, height)
                 .toBuffer(function(err, buffer) {
                     if (err) {
-                        console.log("Compression error, JSON:",
-                            JSON.stringify(err));
-                        callback(err);
+                        var response = {
+                            status: 500,
+                            message: "Unable to compress image to " +
+                                compressedSize + " px :("
+                        };
+                        callback(response);
                     } else {
                         callback(null, buffer);
                     }
@@ -457,9 +458,11 @@ function uploadImg(bucket, key, contentType, imgBuffer, acl, callback) {
     // Upload the image to S3
     s3.upload(params, function(err, data) {
         if (err) {
-            console.log("Error uploading compressed image, JSON:",
-                JSON.stringify(err));
-            callback(err);
+            var response = {
+                status: 500,
+                message: "Unable to upload image :("
+            };
+            callback(response);
         } else {
             callback(null);
         }

@@ -4,7 +4,7 @@ console.log('Loading loginUser function...');
     This will verify the email/password combo,
     then create and return a new token.
 
-    Use AWS to communicate with DynamoDB,
+    Use aws to communicate with DynamoDB,
     underscore to parse payload data,
     bcrypt for data encryption,
     cryptojs for comparing tokens,
@@ -12,7 +12,7 @@ console.log('Loading loginUser function...');
     (who would've thunk it).
 */
 
-var AWS = require('aws-sdk');
+var aws = require('aws-sdk');
 var _ = require('underscore');
 var async = require('async');
 var bcrypt = require('bcryptjs');
@@ -20,12 +20,12 @@ var cryptojs = require('crypto-js');
 var jwt = require('jsonwebtoken');
 
 // Establish a connection to DynamoDB
-AWS.config.update({
+aws.config.update({
     region: "us-east-1",
 });
 
 // Establish a connection with DynamoDB
-var docClient = new AWS.DynamoDB.DocumentClient();
+var docClient = new aws.DynamoDB.DocumentClient();
 
 exports.handler = function(req, context, callback) {
     // Pick out the email and password from the request body.
@@ -42,15 +42,15 @@ exports.handler = function(req, context, callback) {
         },
         function(user, next) {
             insertToken(user, function(err, response) {
-                if (err) {
-                    next(err);
-                } else {
-                    callback(null, response);
-                }
+              next(err, response);
             });
         }
-    ], function(err) {
-        callback(err);
+    ], function(err, response) {
+        if(err) {
+            context.fail(JSON.stringify(err));
+        } else {
+            context.succeed(response);
+        }
     });
 };
 
@@ -67,8 +67,7 @@ function authenticate(body, callback) {
             status: 400,
             message: "Both the email and password given must be of type string."
         };
-
-        callback(400, response);
+        callback(response);
     }
 
     var table = "rec_center_users";
@@ -87,43 +86,33 @@ function authenticate(body, callback) {
     // Execute the query
     docClient.scan(params, function(err, data) {
         if (err) {
-            console.error("Unable to perform scan. Error JSON:",
-                JSON.stringify(err, null, 2));
-
             var response = {
                 status: 500,
                 message: "Unable to query scan :("
             };
-
-            callback(500, response);
+            callback(response);
 
         } else {
-            console.log("Queried successfully. JSON: ",
-                JSON.stringify(data, null, 2));
-
             // See if the queried user's password hash matches.
             if (data.Items.length > 0) {
                 var passwordHash = data.Items[0].password_hash;
                 var match = bcrypt.compareSync(body.password, passwordHash);
 
                 if (match) {
-                    // return resolve(data.Items);
                     callback(null, data.Items[0]);
                 } else {
                     var response = {
                         status: 404,
                         message: "No users match that email/password combination."
                     };
-
-                    callback(404, response);
+                    callback(response);
                 }
             } else {
                 var response = {
                     status: 404,
                     message: "No users match that email/password combination."
                 };
-
-                callback(404, response);
+                callback(response);
             }
         }
     });
@@ -150,19 +139,13 @@ function checkTokenBucket(user, callback) {
     // Execute the scan
     docClient.scan(params, function(err, data) {
         if (err) {
-            console.error("Unable to perform query. Error JSON:",
-                JSON.stringify(err, null, 2));
-
             var response = {
                 status: 500,
                 message: "Unable to scan tokens :("
             };
-
-            callback(500, response);
+            callback(response);
 
         } else {
-            console.log("Scanned tokens successfully. JSON: ",
-                JSON.stringify(data, null, 2));
             if (data.Count < 100) {
                 var time = Math.round((new Date().getTime() / 1000) - 3);
                 for (var i; i < data.Count; i++) {
@@ -174,7 +157,7 @@ function checkTokenBucket(user, callback) {
                                 "every 3 seconds"
                         };
 
-                        callback(401, response);
+                        callback(response);
                         return;
                     }
                 }
@@ -185,8 +168,7 @@ function checkTokenBucket(user, callback) {
                     status: 401,
                     message: "Unauthorized to generate more than 100 active tokens"
                 };
-
-                callback(401, response);
+                callback(response);
             }
         }
     });
@@ -199,7 +181,6 @@ function checkTokenBucket(user, callback) {
  * @return the generated token.
  */
 function insertToken(user, callback) {
-    console.log("o hai");
     var table = "rec_center_tokens";
     var token = generateToken(user, 'authentication');
     if (token) {
@@ -220,17 +201,12 @@ function insertToken(user, callback) {
         // Insert a new token.
         docClient.put(params, function(err, tokenData) {
             if (err) {
-                console.error("Unable to insert token. Error JSON:",
-                    JSON.stringify(err, null, 2));
-
                 var response = {
                     status: 500,
                     message: "Unable to insert token :("
                 };
-
-                callback(500, response);
+                callback(response);
             } else {
-                console.log("Inserted token:", JSON.stringify(tokenData, null, 2));
                 callback(null, {
                     status: 200,
                     authorizationToken: token
@@ -242,8 +218,7 @@ function insertToken(user, callback) {
             status: 500,
             message: "Error generating token :("
         };
-
-        callback(500, response);
+        callback(response);
     }
 }
 
@@ -263,15 +238,12 @@ function generateToken(user, type) {
             id: user.id,
             type: type
         });
-        var encryptedData = cryptojs.AES.encrypt(stringData,
-            'rhS@%vQP28!d"HPR').toString();
-        var token = jwt.sign({
-            token: encryptedData
-        }, 'YTm=3rC6U6]3Y$eX');
+
+        var encryptedData = cryptojs.AES.encrypt(JSON.stringify(stringData),'rhS@%vQP28!d"HPR').toString();
+        var token = jwt.sign(encryptedData, 'YTm=3rC6U6]3Y$eX');
 
         return token;
     } catch (e) {
-        console.log(e);
         return undefined;
     }
 }

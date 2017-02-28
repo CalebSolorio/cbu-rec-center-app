@@ -25,12 +25,12 @@ exports.handler = function(event, context, callback) {
 
     codeExists(email, function(err, doesExist) {
         if(err) {
-            callback(err);
+            context.fail(JSON.stringify(err));
         } else {
             if(doesExist) {
                 recreateAndSendCode(email, function(err) {
                     if(err) {
-                        callback(err);
+                        context.fail(JSON.stringify(err));
                     } else {
                         var response = {
                             status: 200,
@@ -38,7 +38,7 @@ exports.handler = function(event, context, callback) {
                                 "to <" + email + ">",
                         };
 
-                        callback(null, response);
+                        context.succeed(response);
                     }
                 });
             } else {
@@ -47,7 +47,7 @@ exports.handler = function(event, context, callback) {
                     message: "Email/code not found. Try creating a code first.",
                 };
 
-                callback(response);
+                context.fail(JSON.stringify(response));
             }
         }
     });
@@ -75,9 +75,11 @@ function codeExists(email, callback) {
     // See if we can find an existing code associated with this email.
     docClient.get(params, function(err, returnData) {
         if (err) {
-            console.error("Unable to scan the table. Error JSON:",
-                JSON.stringify(err));
-            callback(err);
+            var response = {
+              status: 500,
+              message: "Unable to scan codes :("
+            };
+            callback(response);
         } else {
             if(returnData.Item) {
                 callback(null, true);
@@ -108,17 +110,20 @@ function recreateAndSendCode(email, callback) {
 
             bcrypt.genSalt(10, function(saltErr, salt) {
                 if(saltErr) {
-                    console.log("Error generating salt. Error JSON: " +
-                        JSON.stringify(saltErr));
-                    next(saltErr);
+                    var response = {
+                        status: 500,
+                        message: "Unable to generate salt :(",
+                    };
+                    next(response);
                 } else {
                     bcrypt.hash(code, salt, function(hashErr, hashedCode) {
                         if (hashErr) {
-                            console.log("Error hashing code. Error JSON: " +
-                                JSON.stringify(err));
-                            next(hashErr);
+                            var response = {
+                                status: 500,
+                                message: "Unable to hash code :(",
+                            };
+                            next(response);
                         } else {
-                            console.log("Hashed code:", hashedCode);
                             next(null, code, hashedCode);
                         }
                     });
@@ -143,9 +148,11 @@ function recreateAndSendCode(email, callback) {
 
             docClient.update(params, function(err, data) {
                 if (err) {
-                    console.log("Error inserting code into database, JSON:",
-                        JSON.stringify(err));
-                    next(err);
+                    var response = {
+                        status: 500,
+                        message: "Unable to update code :(",
+                    };
+                    next(response);
                 } else {
                     next(null, originalCode);
                 }
@@ -188,68 +195,15 @@ function recreateAndSendCode(email, callback) {
 
             ses.sendEmail(params, function(err, data) {
                 if(err) {
-                    console.log("Error sending email, JSON:",
-                        JSON.stringify(err));
-                    next(err);
+                    var response = {
+                        status: 500,
+                        message: "Unable to send email :(",
+                    };
+                    next(response);
                 } else {
                     next(null);
                 }
              });
-        }, function removeOldCodes() {
-            // Get the time from 24 hours ago.
-            var time = Math.round(new Date().getTime() / 1000) - (24 * 60 * 60);
-
-            // Prepare the query
-            var params = {
-                TableName: table,
-                FilterExpression: "updated_at < :t",
-                ExpressionAttributeValues: {
-                    ":t": time,
-                },
-                Limit: 1
-            };
-
-            // Execute the query
-            docClient.scan(params, function(err, data) {
-                if (err) {
-                    console.error("Unable to perform query. Error JSON:",
-                        JSON.stringify(err, null, 2));
-                    context.fail(err);
-                } else {
-                    if(data.Items.length > 0) {
-                        var count = 0;
-                        data.Items.forEach(function(item, index) {
-                            // Set to delete tokens more than 30 days old
-                            params = {
-                                TableName: table,
-                                Key: {
-                                    email: item.email
-                                },
-                                Limit: 1,
-                            };
-
-                            // Delete tokens
-                            docClient.delete(params, function(err, delData) {
-                                if (err) {
-                                    console.error("Unable to delete code. Error JSON:",
-                                        JSON.stringify(err, null, 2));
-                                    context.fail(err);
-                                } else {
-                                    console.log("Deleted code:",
-                                        JSON.stringify(delData, null, 2));
-
-                                    count++;
-                                    if(count == data.Items.lenth) {
-                                        callback(null);
-                                    }
-                                }
-                            });
-                        });
-                    } else {
-                        callback(null);
-                    }
-                }
-            });
         }
     ], function(err) {
         callback(err);
