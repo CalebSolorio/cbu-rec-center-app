@@ -209,6 +209,7 @@ function insertToken(user, callback) {
             } else {
                 callback(null, {
                     status: 200,
+                    id: user.id,
                     authorizationToken: token
                 });
             }
