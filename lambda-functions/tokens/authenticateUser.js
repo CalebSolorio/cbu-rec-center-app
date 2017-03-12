@@ -5,11 +5,13 @@ console.log('Loading authenticateUser function...');
     manipulation of an established user's data takes place.
 
     Use aws to communicate with DynamoDB,
-    cryptojs for comparing tokens.
+    cryptojs for comparing tokens,
+    and secret for secret codes.
 */
 
 var aws = require("aws-sdk");
 var cryptojs = require('crypto-js');
+var secret = require('./secret.json');
 
 // Establish a connection to DynamoDB
 aws.config.update({
@@ -38,11 +40,11 @@ exports.handler = function(event, context, callback) {
         // Execute the query
         docClient.get(params, function(err, data) {
             if (err) {
-                var response = {
+                var errRresponse = {
                     status: 500,
                     message: "Unable to get the user's profile :("
                 };
-                context.fail(JSON.stringify(response));
+                context.fail(JSON.stringify(errResponse));
             } else {
                 if (data.Item !== undefined) {
                     var principalId = "User";
@@ -107,6 +109,7 @@ function generatePolicy(principalId, effect, resource) {
  * @param {string} docClient The DynamoDB client.
  * @param {string} table The name of the table to alter data in.
  * @param {string} hashedToken The token to look for.
+ * @param {Object} callback The code to execute after updating a token.
  */
 function updateToken(docClient, table, hashedToken, callback) {
     var time = Math.round(new Date().getTime() / 1000);

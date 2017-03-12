@@ -5,12 +5,14 @@ console.log('Loading unmarkEvent function...');
 
     Use aws to communicate with DynamoDB,
     async for asynchronus operations,
+    user for user token funtions,
     jwt for JSON web tokens,
     and cryptojs for decrypting authorization tokens.
 */
 
 var aws = require('aws-sdk');
 var async = require('async');
+var user= require('./user.js');
 var jwt = require('jsonwebtoken');
 var cryptojs = require('crypto-js');
 
@@ -27,7 +29,9 @@ exports.handler = function(event, context, callback) {
     if(event.authorizationToken && event.eventId) {
         async.waterfall([
             function(next) {
-                getIdFromToken(event.authorizationToken, next);
+                user.authenticate(event.authorizationToken, next);
+            }, function(next) {
+                user.getIdFromToken(event.authorizationToken, next);
             }, function(userId, next) {
                 unmark(userId, event.eventId, next);
             }
@@ -43,38 +47,16 @@ exports.handler = function(event, context, callback) {
             status: 400,
             message: "Authorization token and event id must be provided."
         };
-        callback(response);
+        context.fail(JSON.stringify(response));
     }
 };
-
-/**
- * Parse a user's id from a JSON web token.
- *
- * @param {String} token The token to get the user's id from.
- * @return {String} the id parsed from the token.
- */
-function getIdFromToken(token, callback) {
-    jwt.verify(token, 'YTm=3rC6U6]3Y$eX', function(err, data) {
-        if (err) {
-            var response = {
-                status: 400,
-                message: "Token malformed."
-            };
-            callback(response);
-        } else {
-            callback(null,
-                JSON.parse(JSON.parse(
-                cryptojs.AES.decrypt(data, 'rhS@%vQP28!d"HPR')
-                .toString(cryptojs.enc.Utf8))).id);
-        }
-    });
-}
 
 /**
  * Verify that the mark exists in the database.
  *
  * @param {String} userId The ID of the user in DynamoDB.
  * @param {String} eventId The ID of the event in DynamoDB.
+ * @param {Object} callback The code to execute after verification.
  */
 function verifyMarkExists(userId, eventId, callback) {
     var params = {
@@ -103,6 +85,7 @@ function verifyMarkExists(userId, eventId, callback) {
  *
  * @param {String} userId The ID of the user in DynamoDB.
  * @param {String} eventId The ID of the event in DynamoDB.
+ * @param {Object} callback The code to execute after unmarking an event.
  */
 function unmark(userId, eventId, callback) {
     var params = {

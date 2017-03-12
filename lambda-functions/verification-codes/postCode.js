@@ -68,7 +68,7 @@ exports.handler = function(event, context, callback) {
  * Verify that the given email is a calbaptist.edu email address.
  *
  * @param {String} email The email to validate.
- * @return {boolean} True if the email is a CBU email.
+ * @param {function} callback The code to execute after validating an email.
  */
 function validateEmail(email) {
     var regex = /^\w+([\.-]?\w+)*@calbaptist.edu$/;
@@ -79,7 +79,7 @@ function validateEmail(email) {
  * Check to see if a code for the existing email already exists.
  *
  * @param {String} email The email to find a code with.
- * @return {boolean} True if the email is a CBU email.
+ * @param {function} callback The code to execute after checking the codes.
  */
 function codeExists(email, callback) {
     // Choose the table we want to scan and the attributes we want from it.
@@ -112,6 +112,7 @@ function codeExists(email, callback) {
  * Create a code in DynamoDB
  *
  * @param {String} email The email to identify the code.
+ * @param {function} callback The code to execute after sending code.
  */
 function createAndSendCode(email, callback) {
     var table = "rec_center_codes";

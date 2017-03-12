@@ -5,12 +5,14 @@ console.log('Loading getMarkedEvents function...');
 
     Use aws to communicate with DynamoDB,
     async for asynchronus operations,
+    user for user token funtions,
     jwt for JSON web tokens,
     and cryptojs for decrypting authorization tokens.
 */
 
 var aws = require('aws-sdk');
 var async = require('async');
+var user= require('./user.js');
 var jwt = require('jsonwebtoken');
 var cryptojs = require('crypto-js');
 
@@ -25,7 +27,9 @@ var docClient = new aws.DynamoDB.DocumentClient();
 exports.handler = function(event, context, callback) {
     async.waterfall([
         function(next) {
-            getIdFromToken(event.authorizationToken, next);
+            user.authenticate(event.authorizationToken, next);
+        }, function(next) {
+            user.getIdFromToken(event.authorizationToken, next);
         }, function(userId, next) {
             getEvents(userId, next);
         }
@@ -39,32 +43,10 @@ exports.handler = function(event, context, callback) {
 };
 
 /**
- * Parse a user's id from a JSON web token.
- *
- * @param {String} token The token to get the user's id from.
- * @return {String} the id parsed from the token.
- */
-function getIdFromToken(token, callback) {
-    jwt.verify(token, 'YTm=3rC6U6]3Y$eX', function(err, data) {
-        if (err) {
-            var response = {
-                status: 400,
-                message: "Token malformed."
-            };
-            callback(response);
-        } else {
-            callback(null,
-                JSON.parse(JSON.parse(
-                cryptojs.AES.decrypt(data, 'rhS@%vQP28!d"HPR')
-                .toString(cryptojs.enc.Utf8))).id);
-        }
-    });
-}
-
-/**
  * Get all events that the specified user has marked.
  *
  * @param {String} userId The ID of the user to query marks from.
+ * @param {Object} callback The code to execute after getting all events.
  */
 function getEvents(userId, callback) {
     var params = {
@@ -86,7 +68,7 @@ function getEvents(userId, callback) {
             };
             callback(errResponse);
         } else {
-            if(data.Items.length > 0) {
+            if(data.Count > 0) {
                 events = [];
                 data.Items.forEach(function(element, index, arr) {
                     params = {
@@ -107,7 +89,7 @@ function getEvents(userId, callback) {
                             events.push(eventData.Item);
                         }
 
-                        if(index + 1 == data.Items.length) {
+                        if(index + 1 == data.Count) {
                             callback(null, events);
                         }
                     });

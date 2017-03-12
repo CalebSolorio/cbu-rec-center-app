@@ -4,7 +4,8 @@ console.log('Loading putUser function...');
     Updates a users data/media files.
 
     Use aws to communicate with other AWS services,
-    asyc for asynchronus tasks
+    asyc for asynchronus tasks,
+    user for user token funtions,
     bcryptjs for password hashing,
     cryptojs for token parsing,
     jsonwebtokens for JSON web token creation,
@@ -13,6 +14,7 @@ console.log('Loading putUser function...');
 
 var aws = require("aws-sdk");
 var async = require("async");
+var user = require("./user.js");
 var bcrypt = require('bcryptjs');
 var cryptojs = require('crypto-js');
 var jwt = require('jsonwebtoken');
@@ -32,6 +34,8 @@ var docClient = new aws.DynamoDB.DocumentClient();
 exports.handler = function(event, context, callback) {
     async.waterfall([
         function(next) {
+            user.authenticate(event.authorizationToken, next);
+        }, function(next) {
             verifyDataIntegrity(event, next);
         }, function(data, next) {
             uploadData(event.authorizationToken, data, next);
@@ -49,7 +53,7 @@ exports.handler = function(event, context, callback) {
  * Verify that the data follows the established standards.
  *
  * @param {String} data The unmodified/unchecked data.
- * @return {String} the data to upload.
+ * @param {function} callback The code to execute after verifying integrity.
  */
 function verifyDataIntegrity(data, callback) {
     var uploadData = {};
@@ -120,7 +124,7 @@ function verifyDataIntegrity(data, callback) {
  *
  * @param {String} password The unmodified password.
  * @param {String} token  The token to verify.
- * @return {String} the hashed password.
+ * @param {function} callback The code to execute after verifying the password.
  */
 function verifyPasswordAuth(password, token, callback) {
     if(password) {
@@ -148,6 +152,7 @@ function verifyPasswordAuth(password, token, callback) {
  * Delete a specified token from DynamoDB.
  *
  * @param {String} token The token to delete.
+ * @param {function} callback The code to execute after deleting a token.
  */
 function deleteToken(token, callback) {
     // Initialize variables needed later
@@ -171,11 +176,11 @@ function deleteToken(token, callback) {
       // Delete the token
       docClient.delete(params, function(err, data) {
           if (err) {
-              var response = {
+              var errResponse = {
                   status: 500,
                   message: "Unable to delete token :("
               };
-              callback(response);
+              callback(errResponse);
           } else {
               if (data.Attributes) {
                   callback(null);
@@ -201,7 +206,7 @@ function deleteToken(token, callback) {
  * Hash the password and return the result.
  *
  * @param {String} password The unmodified password.
- * @return {String} the hashed password.
+ * @param {function} callback The code to execute after hashing a password.
  */
 function hashPassword(password, callback) {
     bcrypt.genSalt(10, function(saltErr, salt) {
@@ -232,11 +237,12 @@ function hashPassword(password, callback) {
  *
  * @param {String} token The token to get the user's id from.
  * @param {String} data The data to update with.
+ * @param {function} callback The code to execute after uploading the data.
  */
 function uploadData(token, data, callback) {
     async.waterfall([
         function(next) {
-            getIdFromToken(token, next);
+            user.getIdFromToken(token, next);
         },
         function(id, next) {
             updateUserData(id, data, next);
@@ -247,33 +253,11 @@ function uploadData(token, data, callback) {
 }
 
 /**
- * Parse a user's id from a JSON web token.
- *
- * @param {String} token The token to get the user's id from.
- * @return {String} the id parsed from the token.
- */
-function getIdFromToken(token, callback) {
-    jwt.verify(token, 'YTm=3rC6U6]3Y$eX', function(err, data) {
-        if (err) {
-            var response = {
-                status: 400,
-                message: "Token malformed."
-            };
-            callback(response);
-        } else {
-            callback(null,
-                JSON.parse(JSON.parse(
-                cryptojs.AES.decrypt(data, 'rhS@%vQP28!d"HPR')
-                .toString(cryptojs.enc.Utf8))).id);
-        }
-    });
-}
-
-/**
  * Upload a user's changed data to DynamoDB and S3.
  *
  * @param {String} id The id of the user to update.
  * @param {Object} data The data to upload.
+ * @param {function} callback The code to execute after updating a user's data.
  */
 function updateUserData(id, data, callback) {
     async.parallel([
@@ -292,6 +276,7 @@ function updateUserData(id, data, callback) {
  *
  * @param {String} id The id of the user to update.
  * @param {Object} data The data to upload.
+ * @param {function} callback The code to execute after uploading to DynamoDB.
  */
 function updateDynamoDb(id, data, callback) {
     var updateExpression = "";
@@ -352,6 +337,7 @@ function updateDynamoDb(id, data, callback) {
  * @param {String} image The base64 string of the image.
  * @param {String} id The id of the user in question.
  * @param {String} name The name of the user in question.
+ * @param {function} callback The code to execute after uploading to S3.
  */
 function updateS3(image, id, name, callback) {
     if(image) {
@@ -385,7 +371,7 @@ function updateS3(image, id, name, callback) {
  * Get a user's name from a given id
  *
  * @param {String} id The id of the user in question.
- * @return {String} The name of the user in question.
+ * @param {function} callback The code to execute getting a user's name.
  */
 function getUserName(id, callback) {
     var params = {
@@ -402,11 +388,11 @@ function getUserName(id, callback) {
     // Get the associated info about the user.
     docClient.get(params, function(err, data) {
         if (err) {
-            var response = {
+            var errResponse = {
                 status: 500,
                 message: "Unable to get user info :("
             };
-            callback(response);
+            callback(errResponse);
         } else {
             if (data.Item) {
                 callback(null, data.Item.name);
@@ -425,6 +411,7 @@ function getUserName(id, callback) {
  * Delete a user's data from S3.
  *
  * @param {String} id The id of the user in question.
+ * @param {function} callback The code to execute after deleting from S3.
  */
 function deleteUserFromS3(id, callback) {
     var bucket = "cbu-rec-center-app";
@@ -485,6 +472,7 @@ function deleteUserFromS3(id, callback) {
  * @param {string} b64String The base64 string of the image.
  * @param {string} id The id of the user.
  * @param {string} name The name of the user (optional).
+ * @param {function} callback The code to execute after uploading to S3.
  */
 function s3Upload(b64String, id, name, callback) {
     // Assign the base64 string of the picture to a buffer
@@ -548,6 +536,7 @@ function s3Upload(b64String, id, name, callback) {
  * @param {string} bucket The bucket ot upload to.
  * @param {string} key The key path to upload to.
  * @param {string} acl The permissions associated with the file.
+ * @param {function} callback The code to execute after image manipulation.
  */
 function compressAndUploadImg(imgBuffer, compressedSize,
     contentType, bucket, key, acl, callback) {
@@ -575,6 +564,7 @@ function compressAndUploadImg(imgBuffer, compressedSize,
  * @param {Buffer} imgBuffer The buffer of the image.
  * @param {Integer} compressedSize Desired compression size.
  * @param {string} contentType The type of content.
+ * @param {function} callback The code to execute after image compression.
  */
 function compressImg(imgBuffer, compressedSize, contentType, callback) {
     // Get image size.
@@ -621,6 +611,7 @@ function compressImg(imgBuffer, compressedSize, contentType, callback) {
  * @param {string} contentType The type of content.
  * @param {Buffer} imgBuffer The buffer of the image.
  * @param {string} acl The permissions associated with the file.
+ * @param {function} callback The code to execute after uploading an image.
  */
 function uploadImg(bucket, key, contentType, imgBuffer, acl, callback) {
     var s3 = new aws.S3({

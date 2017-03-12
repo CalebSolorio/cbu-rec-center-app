@@ -59,6 +59,7 @@ exports.handler = function(event, context, callback) {
  *
  * @param {String} email The email to find a code with.
  * @return {boolean} True if the email is a CBU email.
+ * @param {function} callback What to execute after checking the codes.
  */
 function codeExists(email, callback) {
     // Choose the table we want to scan and the attributes we want from it.
@@ -94,6 +95,7 @@ function codeExists(email, callback) {
  * Create a code in DynamoDB
  *
  * @param {String} email The email to identify the code.
+ * @param {function} callback The code to execute after resending a code.
  */
 function recreateAndSendCode(email, callback) {
     var table = "rec_center_codes";

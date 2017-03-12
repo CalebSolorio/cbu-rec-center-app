@@ -9,7 +9,8 @@ console.log('Loading loginUser function...');
     bcrypt for data encryption,
     cryptojs for comparing tokens,
     and jsonwebtokens for JSON Web Token creation
-    (who would've thunk it).
+    (who would've thunk it),
+    and secret for secret codes.
 */
 
 var aws = require('aws-sdk');
@@ -18,6 +19,7 @@ var async = require('async');
 var bcrypt = require('bcryptjs');
 var cryptojs = require('crypto-js');
 var jwt = require('jsonwebtoken');
+var secret = require('./secret.json');
 
 // Establish a connection to DynamoDB
 aws.config.update({
@@ -59,6 +61,7 @@ exports.handler = function(req, context, callback) {
  *
  * @param {Object} body The request data given by the client.
  * @return the user associated with the given email and password.
+ * @param {Object} callback The code to execute after authentication.
  */
 function authenticate(body, callback) {
     if (typeof body.email !== 'string' ||
@@ -86,27 +89,18 @@ function authenticate(body, callback) {
     // Execute the query
     docClient.scan(params, function(err, data) {
         if (err) {
-            var response = {
+            var errResponse = {
                 status: 500,
                 message: "Unable to query scan :("
             };
-            callback(response);
+            callback(errResponse);
 
         } else {
             // See if the queried user's password hash matches.
-            if (data.Items.length > 0) {
-                var passwordHash = data.Items[0].password_hash;
-                var match = bcrypt.compareSync(body.password, passwordHash);
-
-                if (match) {
-                    callback(null, data.Items[0]);
-                } else {
-                    var response = {
-                        status: 404,
-                        message: "No users match that email/password combination."
-                    };
-                    callback(response);
-                }
+            if (data.Items.length > 0 &&
+                    data.Items !== undefined &&
+                    bcrypt.compareSync(body.password, data.Items[0].password_hash)) {
+                callback(null, data.Items[0]);
             } else {
                 var response = {
                     status: 404,
@@ -122,6 +116,7 @@ function authenticate(body, callback) {
  * Verify that the user is authorized to generate a token.
  *
  * @param {Object} user The user whose tokens to check for.
+ * @param {Object} callback The code to execute after checking token bucket.
  */
 function checkTokenBucket(user, callback) {
     // Prepare the scan
@@ -139,14 +134,14 @@ function checkTokenBucket(user, callback) {
     // Execute the scan
     docClient.scan(params, function(err, data) {
         if (err) {
-            var response = {
+            var errResponse = {
                 status: 500,
                 message: "Unable to scan tokens :("
             };
-            callback(response);
+            callback(errResponse);
 
         } else {
-            if (data.Count < 100) {
+            if (data.Count < 300) {
                 var time = Math.round((new Date().getTime() / 1000) - 3);
                 for (var i; i < data.Count; i++) {
                     var token = data.Items[i];
@@ -164,11 +159,11 @@ function checkTokenBucket(user, callback) {
 
                 callback(null, user);
             } else {
-                var response = {
+                var fullResponse = {
                     status: 401,
                     message: "Unauthorized to generate more than 100 active tokens"
                 };
-                callback(response);
+                callback(fullResponse);
             }
         }
     });
@@ -178,7 +173,7 @@ function checkTokenBucket(user, callback) {
  * Generate and intert a new token into DynamoDB.
  *
  * @param {Object} user The user whose data to generate a token off of.
- * @return the generated token.
+ * @param {Object} callback The code to execute after inserting a token.
  */
 function insertToken(user, callback) {
     var table = "rec_center_tokens";
@@ -227,7 +222,7 @@ function insertToken(user, callback) {
  * Create a token using the clients encrypted and signed info.
  *
  * @param {Object} body The user whose data to generated the token off of.
- * @return the generated token.
+ * @param {Object} callback The code to execute after generating a token.
  */
 function generateToken(user, type) {
     if (!_.isString(type)) {
@@ -240,8 +235,8 @@ function generateToken(user, type) {
             type: type
         });
 
-        var encryptedData = cryptojs.AES.encrypt(JSON.stringify(stringData),'rhS@%vQP28!d"HPR').toString();
-        var token = jwt.sign(encryptedData, 'YTm=3rC6U6]3Y$eX');
+        var encryptedData = cryptojs.AES.encrypt(JSON.stringify(stringData),secret.crypto).toString();
+        var token = jwt.sign(encryptedData, secret.jwt);
 
         return token;
     } catch (e) {

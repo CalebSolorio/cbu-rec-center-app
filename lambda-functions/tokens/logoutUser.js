@@ -5,12 +5,14 @@ console.log('Loading logoutOfficer function...');
 
     Use aws to communicate with DynamoDB,
     underscore to parse payload data,
-    and cryptojs for comparing tokens.
+    cryptojs for comparing tokens,
+    and user for user token funtions.
 */
 
 var aws = require('aws-sdk');
-var _ = require('underscore');
+var async = require("async");
 var cryptojs = require('crypto-js');
+var user = require('./user.js');
 
 // Establish a connection to DynamoDB
 aws.config.update({
@@ -24,6 +26,27 @@ exports.handler = function(event, context, callback) {
     // Pick out the authentication token from the request body.
     var token = event.authorizationToken;
 
+    async.waterfall([
+        function(next) {
+            user.authenticate(token, next);
+        }, function(next) {
+            deleteToken(token, next);
+        }
+    ], function(err) {
+        if(err) {
+            context.fail(JSON.stringify(err));
+        } else {
+            context.succeed({ status: 200 });
+        }
+    });
+};
+
+
+/**
+ * @param {String} token The given token.
+ * @param {function} callback The code to execute after deleting a token.
+ */
+function deleteToken(token, callback) {
     // Initialize variables needed later
     var table = "rec_center_tokens";
     var params = {};
@@ -43,20 +66,20 @@ exports.handler = function(event, context, callback) {
         // Delete the token
         docClient.delete(params, function(err, data) {
             if (err) {
-                var response = {
+                var errResponse = {
                     status: 500,
                     message: "Unable to delete token :("
                 };
-                context.fail(JSON.stringify(response));
+                callback(errResponse);
             } else {
                 if (data.Attributes) {
-                    context.succeed({ status: 200 });
+                    callback(null);
                 } else {
                     var response = {
                         status: 401,
                         message: "No token found"
                     };
-                    context.fail(JSON.stringify(response));
+                    callback(response);
                 }
             }
         });
@@ -65,6 +88,6 @@ exports.handler = function(event, context, callback) {
             status: 400,
             message: "No token provided"
         };
-        context.fail(JSON.stringify(response));
+        callback(response);
     }
-};
+}

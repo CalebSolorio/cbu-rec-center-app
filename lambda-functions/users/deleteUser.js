@@ -6,12 +6,14 @@ console.log('Loading deleteUser function...');
     Use aws to communicate with other AWS services,
     underscore to parse payload data,
     asyc for sequential tasks,
+    user for user token funtions,
     and crypto-js for token parsing.
 */
 
 var aws = require("aws-sdk");
 var jwt = require('jsonwebtoken');
 var async = require("async");
+var user = require("./user.js");
 var cryptojs = require('crypto-js');
 
 // Establish a connection to DynamoDB
@@ -23,7 +25,9 @@ exports.handler = function(event, context, callback) {
 
     async.waterfall([
         function(next) {
-            getIdFromToken(event.authorizationToken, next);
+            user.authenticate(event.authorizationToken, next);
+        }, function(next) {
+            user.getIdFromToken(event.authorizationToken, next);
         }, function(id, next) {
             deleteUserData(id, next);
         }
@@ -37,32 +41,10 @@ exports.handler = function(event, context, callback) {
 };
 
 /**
- * Parse a user's id from a JSON web token.
+ * Removes a user's data.
  *
- * @param {String} token The token to get the user's id from.
- * @return {String} the id parsed from the token.
- */
-function getIdFromToken(token, callback) {
-    jwt.verify(token, 'YTm=3rC6U6]3Y$eX', function(err, data) {
-        if (err) {
-            var response = {
-                status: 400,
-                message: "Token malformed."
-            };
-            callback(response);
-        } else {
-            callback(null,
-                JSON.parse(JSON.parse(
-                cryptojs.AES.decrypt(data, 'rhS@%vQP28!d"HPR')
-                .toString(cryptojs.enc.Utf8))).id);
-        }
-    });
-}
-
-/**
- * Hash the password and return the result.
- *
- * @param {String} password The unmodified password.
+ * @param {String} id The user's id.
+ * @param {function} callback The code to execute after deleting a user's data.
  */
 function deleteUserData(id, callback) {
 
@@ -81,6 +63,12 @@ function deleteUserData(id, callback) {
     });
 }
 
+/**
+ * Removes a user's file from S3.
+ *
+ * @param {String} id The user's id.
+ * @param {function} callback The code to execute after deleting from S3.
+ */
 function deleteFromS3(id, callback) {
     var bucket = 'cbu-rec-center-app';
 
@@ -137,6 +125,12 @@ function deleteFromS3(id, callback) {
     });
 }
 
+/**
+ * Removes a user's data from DynamoDB.
+ *
+ * @param {String} id The user's id.
+ * @param {function} callback The code to execute after deleting from DynamoDB.
+ */
 function deleteFromDynamoDb(id, callback) {
     // Choose the table we want to scan and the attributes we want from it.
     var params = {

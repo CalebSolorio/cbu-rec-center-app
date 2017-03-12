@@ -93,7 +93,7 @@ exports.handler = function(event, context, callback) {
  *
  * @param {String} email The email to find a code with.
  * @param {String} code The code to match with.
- * @returns {boolean} true if the email/code match.
+ * @param {function} callback The code to execute after getting matching.
  */
 function codeMatch(email, code, callback) {
     // Choose the table we want to scan and the attributes we want from it.
@@ -124,6 +124,7 @@ function codeMatch(email, code, callback) {
  *
  * @param {String} userImage The base64 encoded string of the user's picture.
  * @param {String} userData The text data to store in DynamoDB.
+ * @param {function} callback The code to execute after uploading a user's data.
  */
 function uploadData(userImage, userData, callback) {
     async.waterfall([
@@ -205,7 +206,7 @@ function uploadData(userImage, userData, callback) {
  * Hash the password and return the result.
  *
  * @param {String} password The unmodified password.
- * @return {String} the hashed password.
+ * @param {function} callback The code to execute after hasing a password.
  */
 function hashPassword(password, callback) {
     bcrypt.genSalt(10, function(saltErr, salt) {
@@ -235,6 +236,7 @@ function hashPassword(password, callback) {
  * Insert a new row of data into DynamoDB.
  *
  * @param {Object} item The information the insert into the table.
+ * @param {function} callback The code to execute after uploading to DynamoDB.
  */
 function dynamoDbUpload(item, callback) {
     var table = "rec_center_users";
@@ -251,11 +253,11 @@ function dynamoDbUpload(item, callback) {
 
     docClient.scan(params, function(err, data) {
         if (err) {
-            var response = {
+            var errResponse = {
                 status: 500,
                 message: "Unable to scan users :("
             };
-            callback(response);
+            callback(errResponse);
         } else {
             if (data.Items.length > 0) {
                 var response = {
@@ -292,6 +294,7 @@ function dynamoDbUpload(item, callback) {
  * @param {string} b64String The base64 string of the image.
  * @param {string} id The id of the user.
  * @param {string} name The name of the user (optional).
+ * @param {function} callback The code to execute after uploading to S3.
  */
 function s3Upload(b64String, id, name, callback) {
     // Check to make sure the passed in string is actually an image
@@ -365,6 +368,7 @@ function s3Upload(b64String, id, name, callback) {
  * @param {string} bucket The bucket ot upload to.
  * @param {string} key The key path to upload to.
  * @param {string} acl The permissions associated with the file.
+ * @param {function} callback The code to execute after compressing and uploading.
  */
 function compressAndUploadImg(imgBuffer, compressedSize,
     contentType, bucket, key, acl, callback) {
@@ -392,6 +396,7 @@ function compressAndUploadImg(imgBuffer, compressedSize,
  * @param {Buffer} imgBuffer The buffer of the image.
  * @param {Integer} compressedSize Desired compression size.
  * @param {string} contentType The type of content.
+ * @param {function} callback The code to execute after compression.
  */
 function compressImg(imgBuffer, compressedSize, contentType, callback) {
     // Get image size.
@@ -438,6 +443,7 @@ function compressImg(imgBuffer, compressedSize, contentType, callback) {
  * @param {string} contentType The type of content.
  * @param {Buffer} imgBuffer The buffer of the image.
  * @param {string} acl The permissions associated with the file.
+ * @param {function} callback The code to execute after uploading an image.
  */
 function uploadImg(bucket, key, contentType, imgBuffer, acl, callback) {
     var s3 = new aws.S3({

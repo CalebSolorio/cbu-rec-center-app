@@ -9,6 +9,7 @@ console.log('Loading getScheduleByDate function...');
 
 var aws = require('aws-sdk');
 var async = require('async');
+var user = require('./user.js');
 
 // Establish a connection to DynamoDB
 aws.config.update({
@@ -19,68 +20,79 @@ aws.config.update({
 var docClient = new aws.DynamoDB.DocumentClient();
 
 exports.handler = function(event, context, callback) {
-    // ISO string of the given time.
-    var date = new Date(Date.parse(event.date))
-        .toISOString().substring(0, 10);
+    async.waterfall([
+        function(next) {
+            user.authenticate(event.authorizationToken, next);
+        }, function(next) {
+            // ISO string of the given time.
+            var date = new Date(Date.parse(event.date))
+                .toISOString().substring(0, 10);
 
-    var params = {
-        TableName: "rec_center_hours",
-        Key: {
-            "date": date,
-        },
-    };
-
-    // Establish connection with DynamoDB
-    var docClient = new aws.DynamoDB.DocumentClient();
-
-    // Get the associated info about the user.
-    docClient.get(params, function(err, data) {
-        if (err) {
-            var response = {
-                status: 500,
-                message: "Unable to get hours :("
+            var params = {
+                TableName: "rec_center_hours",
+                Key: {
+                    "date": date,
+                },
             };
-            context.fail(JSON.stringify(response));
-        } else {
-            if (data.Item) {
-                var returnData = {
-                    date: data.Item.date,
-                    hours: data.Item.hours
-                };
 
-                params = {
-                    TableName: "rec_center_events",
-                    FilterExpression: "begins_with (#s.#d, :d)",
-                    ExpressionAttributeNames: {
-                        "#s": "start",
-                        "#d": "dateTime",
-                    },
-                    ExpressionAttributeValues: {
-                        ":d": date,
-                    },
-                };
+            // Establish connection with DynamoDB
+            var docClient = new aws.DynamoDB.DocumentClient();
 
-                docClient.scan(params, function(err, events) {
-                    if(err) {
-                        var response = {
-                            status: 500,
-                            message: "Unable to get events :("
+            // Get the associated info about the user.
+            docClient.get(params, function(err, data) {
+                if (err) {
+                    var response = {
+                        status: 500,
+                        message: "Unable to get hours :("
+                    };
+                    next(response);
+                } else {
+                    if (data.Item) {
+                        var returnData = {
+                            date: data.Item.date,
+                            hours: data.Item.hours
                         };
-                        context.fail(JSON.stringify(response));
-                    } else {
-                        returnData.items = events.Items;
-                        context.succeed(returnData);
-                    }
-                });
 
-            } else {
-                var response = {
-                    status: 404,
-                    message: "Day not found."
-                };
-                context.fail(JSON.stringify(response));
-            }
+                        params = {
+                            TableName: "rec_center_events",
+                            FilterExpression: "begins_with (#s.#d, :d)",
+                            ExpressionAttributeNames: {
+                                "#s": "start",
+                                "#d": "dateTime",
+                            },
+                            ExpressionAttributeValues: {
+                                ":d": date,
+                            },
+                        };
+
+                        docClient.scan(params, function(err, events) {
+                            if(err) {
+                                var response = {
+                                    status: 500,
+                                    message: "Unable to get events :("
+                                };
+                                next(response);
+                            } else {
+                                returnData.items = events.Items;
+                                next(null, returnData);
+                            }
+                        });
+
+                    } else {
+                        var response = {
+                            status: 404,
+                            message: "Day not found."
+                        };
+                        next(response);
+                    }
+                }
+            });
+        }
+    ], function(err, data) {
+        if(err) {
+            context.fail(JSON.stringify(err));
+        } else {
+            context.succeed(data);
         }
     });
-
 };

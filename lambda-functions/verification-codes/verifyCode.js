@@ -22,7 +22,7 @@ exports.handler = function(event, context, callback) {
         if(err) {
             context.fail(JSON.stringify(err));
         } else {
-            context.succeed(matches);
+            context.succeed({ matches: matches });
         }
     });
 };
@@ -32,7 +32,7 @@ exports.handler = function(event, context, callback) {
  *
  * @param {String} email The email to find a code with.
  * @param {String} code The code to match with.
- * @returns {boolean} true if the email/code match.
+ * @param {function} callback The code to execute after matching the code.
  */
 function codeMatch(email, code, callback) {
     // Choose the table we want to scan and the attributes we want from it.
@@ -53,11 +53,11 @@ function codeMatch(email, code, callback) {
                 status: 500,
                 message: "Unable to scan for codes :("
             };
-            context.fail(response);
+            callback(response);
         } else {
             var result = data.Item ?
                 bcrypt.compareSync(code, data.Item.code_hash) : false;
-            context.succeed(result);
+            callback(null, result);
         }
     });
 }

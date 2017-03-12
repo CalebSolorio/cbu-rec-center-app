@@ -18,14 +18,11 @@ exports.handler = function(event, context, callback) {
     async.waterfall([
         function(next) {
             getClientSecret(next);
-        },
-        function(content, next) {
+        }, function(content, next) {
             authorize(content, next);
-        },
-        function(credentials, next) {
-            getEvents(credentials, next)
-        },
-        function(schedule, next) {
+        }, function(credentials, next) {
+            getEvents(credentials, next);
+        }, function(schedule, next) {
             saveEvents(schedule, next);
         }
     ], function(err, response) {
@@ -35,7 +32,7 @@ exports.handler = function(event, context, callback) {
             context.succeed(response);
         }
     });
-}
+};
 
 /**
  * Gets the client secret from S3.
@@ -97,6 +94,7 @@ function authorize(credentials, callback) {
  * Gets the events from both the event and class calendars.
  *
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
+ * @param {Object} callback The code to execute after getting all events.
  */
 function getEvents(auth, callback) {
     var eventCalendarId = 'cburecreationcenter@gmail.com';
@@ -183,20 +181,12 @@ function insertEvent(object, event, isEvent) {
         var summary = event.summary.split("-");
         if (summary.length == 2) {
             var time1 = parseInt(summary[0]);
-            time1 += summary[0].slice(-2).toLowerCase() == "pm"
-                ? 12
-                : 0;
-            time1 = (time1 < 10
-                ? "0" + time1
-                : time1) + ":00";
+            time1 += summary[0].slice(-2).toLowerCase() == "pm" ? 12 : 0;
+            time1 = (time1 < 10 ? "0" + time1 : time1) + ":00";
 
             var time2 = parseInt(summary[1]);
-            time2 += summary[1].slice(-2).toLowerCase() == "pm"
-                ? 12
-                : 0;
-            time2 = (time2 < 10
-                ? "0" + time2
-                : time2) + ":00";
+            time2 += summary[1].slice(-2).toLowerCase() == "pm" ? 12 : 0;
+            time2 = (time2 < 10 ? "0" + time2 : time2) + ":00";
 
             object.days.push({
                 date: date,
@@ -211,9 +201,7 @@ function insertEvent(object, event, isEvent) {
         var dateTime = event.start.dateTime.split("T");
         for (var j = 0, len2 = object.days.length; j < len2; j++) {
             if (dateTime[0] == object.days[j].date) {
-                event.type = isEvent
-                    ? "event"
-                    : "class";
+                event.type = isEvent ? "event" : "class";
                 object.days[j].items.push(event);
                 return;
             }
@@ -358,7 +346,7 @@ function saveEvents(data, callback) {
                             };
                             callback(err);
                         } else {
-                            var event = data.days[i].items[j];
+                            event = data.days[i].items[j];
                             var table = "rec_center_events";
 
                             if (event.Item) {
