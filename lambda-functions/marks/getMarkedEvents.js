@@ -69,7 +69,7 @@ function getEvents(userId, callback) {
             callback(errResponse);
         } else {
             if(data.Count > 0) {
-                events = [];
+                items = [];
                 data.Items.forEach(function(element, index, arr) {
                     params = {
                         TableName: "rec_center_events",
@@ -86,11 +86,35 @@ function getEvents(userId, callback) {
                             };
                             callback(response);
                         } else {
-                            events.push(eventData.Item);
-                        }
+                            var params = {
+                                TableName : "rec_center_marks",
+                                ProjectionExpression:"user_id",
+                                KeyConditionExpression: "event_id = :id",
+                                ExpressionAttributeValues: {
+                                    ":id": element.event_id
+                                }
+                            };
 
-                        if(index + 1 == data.Count) {
-                            callback(null, events);
+                            docClient.query(params, function(err, markData) {
+                                if (err) {
+                                    var response = {
+                                        status: 500,
+                                        message: "Unable to get query marks :("
+                                    };
+                                    next(response);
+                                } else {
+                                    var item = {
+                                        details: eventData.Item,
+                                        marks: markData.Items
+                                    };
+
+                                    items.push(item);
+
+                                    if(index + 1 == data.Count) {
+                                        callback(null, items);
+                                    }
+                                }
+                            });
                         }
                     });
                 });

@@ -15,6 +15,7 @@ var async = require('async');
 var user= require('./user.js');
 var jwt = require('jsonwebtoken');
 var cryptojs = require('crypto-js');
+var virality = require('./virality.js');
 
 
 // Establish a connection to DynamoDB
@@ -34,7 +35,9 @@ exports.handler = function(event, context, callback) {
                 user.getIdFromToken(event.authorizationToken, next);
             }, function(userId, next) {
                 unmark(userId, event.eventId, next);
-            }
+            }, function(next) {
+                virality.update(eventId, next);
+             }
         ], function(err) {
             if(err) {
                 context.fail(JSON.stringify(err));

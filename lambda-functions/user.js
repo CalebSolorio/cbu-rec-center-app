@@ -1,8 +1,5 @@
-console.log('Loading authenticateUser function...');
-
 /*
-    This is an authenticator that will run before any
-    manipulation of an established user's data takes place.
+    This module is used for user authentication.
 
     Use aws to communicate with DynamoDB,
     cryptojs for comparing tokens,
@@ -21,6 +18,12 @@ aws.config.update({
 });
 
 module.exports = {
+    /**
+     * Verify a token's integirty
+     *
+     * @param {String} token The token to verify user with.
+     * @param {String} callback What to do after authentication..
+     */
     authenticate: function(token, callback) {
         // Find a hashed token that matches the clients.
         if (token !== undefined) {
@@ -94,7 +97,7 @@ module.exports = {
      * Parse a user's id from a JSON web token.
      *
      * @param {String} token The token to get the user's id from.
-     * @param {String} callback The token to get the user's id from.
+     * @param {String} callback What to do after getting id.
      */
     getIdFromToken: function(token, callback) {
         jwt.verify(token, secret.jwt, function(err, data) {

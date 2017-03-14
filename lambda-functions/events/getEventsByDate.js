@@ -73,8 +73,39 @@ exports.handler = function(event, context, callback) {
                                 };
                                 next(response);
                             } else {
-                                returnData.items = events.Items;
-                                next(null, returnData);
+                                returnData.items = [];
+
+                                events.Items.forEach(function(element, index, arr) {
+                                    var params = {
+                                        TableName : "rec_center_marks",
+                                        ProjectionExpression:"user_id",
+                                        KeyConditionExpression: "event_id = :id",
+                                        ExpressionAttributeValues: {
+                                            ":id": element.id
+                                        }
+                                    };
+
+                                    docClient.query(params, function(err, markData) {
+                                        if (err) {
+                                            var response = {
+                                                status: 500,
+                                                message: "Unable to get events :("
+                                            };
+                                            next(response);
+                                        } else {
+                                            var item = {
+                                                details: eventData.Item,
+                                                marks: markData.Items
+                                            };
+
+                                            returnData.items.push(item);
+
+                                            if(index + 1 == events.Count) {
+                                                next(null, events);
+                                            }
+                                        }
+                                    });
+                                }
                             }
                         });
 
