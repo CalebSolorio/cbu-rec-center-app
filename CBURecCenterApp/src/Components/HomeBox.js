@@ -16,7 +16,6 @@ export default class HomeBox extends Component {
 
   render() {
     return (
-
         <TouchableHighlight onPress={() => this.navigate(this.props.title)} style={styles.Box}>
             <Text style={styles.Text}> {this.props.title}</Text>
         </TouchableHighlight>
