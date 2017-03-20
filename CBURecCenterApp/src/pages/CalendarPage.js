@@ -1,30 +1,77 @@
 import React, { Component, PropTypes } from 'react';
-import { View, Text, ListView, StyleSheet, TouchableHighlight } from 'react-native';
+import { View, Text, ListView, StyleSheet, TouchableHighlight, ActivityIndicator} from 'react-native';
 import Header from '../Components/Header';
-import schedule from '../schedule.json';
+import Api from '../Utility/Api';
+
 
 export default class CalendarPage extends Component {
-    constructor(props) {
-        super(props);
-        const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-        this.state = {
-          dataSource: ds.cloneWithRows([
-              schedule.days[0].date, schedule.days[0].hours.open, schedule.days[0].items[0].summary,
-              schedule.days[1].date, schedule.days[1].hours.open, schedule.days[1].items[0].summary
-          ])
-        };
-      }
-      render() {
+
+constructor(props) {
+    super(props);
+    this.state = {
+          data: null,
+          dateIndex: 0
+        }
+}
+
+    async componentWillMount() { this.setState(
+        {data: await Api.getDates()},
+
+        )
+    }
+
+    nextDay(){
+        this.setState({dateIndex: this.state.dateIndex + 1});
+    }
+
+    previousDay(){
+        if(this.state.dateIndex !== 0){
+            this.setState({dateIndex: this.state.dateIndex - 1});
+        }
+    }
+
+    render() {
+        if (!this.state.data) {
+          return (
+            <ActivityIndicator
+              animating={true}
+              style={styles.indicator}
+              size="large"
+            />
+          );
+        }
+
         return (
           <View style={{flex: 1}}>
-            <Header pageName="Calendar" navigator={this.props.navigator}/>
-            <View style = {{flex:9}}>
-                <ListView
-                  dataSource={this.state.dataSource}
-                  renderRow={(rowData) => <Text>{rowData}</Text>}
-                />
-             </View>
+            <Header pageName="Calendar" navigator={this.props.navigator} style={{flex: 1}}/>
+            <View style={{flex: 7}}>
+              { this.state.data.days[this.state.dateIndex].items.map((item) => (
+                <View>
+                  <Text>{item.summary}</Text>
+                  <Text>{item.start.dateTime}</Text>
+                  <Text></Text>
+                </View>
+              ))}
+            </View>
+            <View style={{flex: 2, flexDirection: 'row'}}>
+                <TouchableHighlight onPress={() => this.previousDay()} style={{flex: 2}}>
+                    <Text> Previous Day </Text>
+                </TouchableHighlight>
+                <TouchableHighlight onPress={() => this.nextDay()} style={{flex: 2}}>
+                    <Text> Next Day </Text>
+                </TouchableHighlight>
+
+            </View>
           </View>
         );
       }
     }
+
+const styles = StyleSheet.create({
+  indicator: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 80
+  }
+});
