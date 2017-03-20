@@ -85,11 +85,11 @@ function deleteFromS3(id, callback) {
     // List all objects in the directory.
     s3.listObjects(params, function(err, data) {
         if(err) {
-            var response = {
-                status: 500,
-                message: "Unable to locate the user's media files :("
-            };
-            callback(response);
+          var response = {
+              status: 500,
+              message: "Unable to locate user's media files :("
+          };
+          callback(response);
         } else {
             var s3Objects = [];
 
@@ -101,26 +101,31 @@ function deleteFromS3(id, callback) {
                 s3Objects.push(thisKey);
             });
 
-            // Establish the parameters to delete all objects in the directory.
-            params = {
-              Bucket: bucket,
-              Delete: {
-                Objects: s3Objects
-              }
-            };
+            if(s3Objects.length > 0) {
+                // Establish the parameters to delete all objects in the directory.
+                params = {
+                  Bucket: bucket,
+                  Delete: {
+                    Objects: s3Objects
+                  }
+                };
 
-            // Delete all objects in the directory.
-            s3.deleteObjects(params, function(err, data) {
-                if(err) {
-                    var response = {
-                        status: 500,
-                        message: "Unable to delete the user's media files :("
-                    };
-                    callback(response);
-                } else {
-                    callback(null);
-                }
-            });
+                // Delete all objects in the directory.
+                s3.deleteObjects(params, function(err, data) {
+                    if(err) {
+                        var response = {
+                            status: 500,
+                            message: "Unable to delete the user's media files :("
+                        };
+                        callback(response);
+                    } else {
+                        callback(null);
+                    }
+                });
+            } else {
+                // No files to delete.
+                callback(null);
+            }
         }
     });
 }
