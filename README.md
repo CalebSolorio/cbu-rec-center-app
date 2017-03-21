@@ -3,7 +3,7 @@
 #### API Endpoint: https://1fgs4l61r4.execute-api.us-east-1.amazonaws.com/Sprint2
 
 ## API Resources
-- ##### [/code]("#code"):
+- ##### [/code](#code):
    - ###### [/send]("#code-send") : Send verification code.
    - ###### [/resend]("#code-resend") : Resend verification code.
    - ###### [/verify]("#code-verify") : Verify verification code.
