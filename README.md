@@ -95,7 +95,7 @@ This endpoint deals with all functionality centered around getting infromation o
 ### <a id="events-date"></a>/date : GET
 Calling this resource will get information on the Rec Center, sorted by a specified date.</br>
 **URL Query Strings:**
-- date : The date of the day you want info on in ISO string format (e.g. "4-12-17").
+- date : The date of the day you want info on in a format that can be converted to an ISO string (e.g. '3-22-17').
 
 **Headers:** 
 - authorizationToken : The JSON token given at the time of logging in.
@@ -140,7 +140,7 @@ Calling this resource will get information on the Rec Center, sorted by a specif
 ## <a id="events-viral"></a>/viral : GET
 Calling this resource will get information on the Rec Center, sorted by virality score (which is calculated from the amount of time until the class/event starts and the number of marks it has recieved).</br>
 **URL Query Strings:**
-- start : The index to start collecting from (specifying "30" will start collecting from the 30th most viral item onwards).
+- start : The index to start collecting from (specifying '30' will start collecting from the 30th most viral item onwards).
 
 **Headers:** 
 - authorizationToken : The JSON token given at the time of logging in.
@@ -181,7 +181,8 @@ Calling this resource will get information on the Rec Center, sorted by virality
 }
 ```
 
-## <a id="login"></a>/login : DELETE
+# <a id="login"></a>/login
+## DELETE
 Calling this resource will take a given authorization token and delete it from the database, logging out the user from that specific device.</br>
 **URL Query Strings:** None</br>
 **Headers:**
@@ -201,7 +202,7 @@ Calling this resource will take a given authorization token and delete it from t
   "message": "Not a valid token. Access Denied."
 }
 ```
-## /login : POST
+## POST
 Calling this resource will take a given email and password combo and attempt to match it to a combo in the database. If the combo is valid, a JSON web token will be returned for the client to use for future authorization.</br>
 **URL Query Strings:** None</br>
 **Headers:** None</br>
@@ -225,5 +226,88 @@ Calling this resource will take a given email and password combo and attempt to 
 {
   "status": 404,
   "message": "No users match that email/password combination."
+}
+```
+
+# <a id="marks"></a>/marks
+## GET
+Calling this resource will get the classes/events that the client has previously marked.</br>
+**URL Query Strings:** None </br>
+**Headers:**
+- authorizationToken : The JSON token given at the time of logging in.
+
+**Body:** None </br>
+**Successful Response Example:**
+```
+[
+  {
+    "updated_at": "2017-01-08T01:26:58.649Z",
+    "status": "confirmed",
+    "end": {
+      "dateTime": "2017-03-25T11:00:00-07:00",
+      "timeZone": "America/Los_Angeles"
+    },
+    "description": "Get your feet moving and heart pumping by combining strength and\nendurance conditioning on a stationary bike. An intense form of interval training. Tabata drills consist of 20 seconds of work\nfollowed by 10 seconds of rest. ",
+    "id": "u70gnq1u9fdqf1g26l4bc31c2g_20170325T173000Z",
+    "start": {
+      "dateTime": "2017-03-25T10:30:00-07:00",
+      "timeZone": "America/Los_Angeles"
+    },
+    "title": "Tabata Cycle",
+    "type": "class"
+  }
+]
+```
+**Unsuccessful Response Example:**
+```
+{
+  "status": 404,
+  "message": "No marked data found."
+}
+```
+
+## DELETE
+Calling this resource will unmark a class/event that the client has previously marked.</br>
+**URL Query Strings:** 
+- eventId: The id of the event to unmark (e.g. u70gnq1u9fdqf1g26l4bc31c2g_20170325T173000Z).
+
+**Headers:**
+- authorizationToken : The JSON token given at the time of logging in.
+
+**Body:** None </br>
+**Successful Response Example:**
+```
+{
+  "status": 200
+}
+```
+**Unsuccessful Response Example:**
+```
+{
+  "status": 404,
+  "message": "No event found."
+}
+```
+
+## POST
+Calling this resource will mark a class/event that the client is interested in.</br>
+**URL Query Strings:** 
+- eventId: The id of the event to mark (e.g. u70gnq1u9fdqf1g26l4bc31c2g_20170325T173000Z).
+
+**Headers:**
+- authorizationToken : The JSON token given at the time of logging in.
+
+**Body:** None </br>
+**Successful Response Example:**
+```
+{
+  "status": 200
+}
+```
+**Unsuccessful Response Example:**
+```
+{
+  "status": 403,
+  "message": "User has already marked this event"
 }
 ```
