@@ -33,11 +33,11 @@ exports.handler = function(event, context, callback) {
             }, function(next) {
                 virality.getMostViral(event.start ? event.start : 0, next);
             }
-        ], function(err) {
+        ], function(err, returnData) {
             if(err) {
                 context.fail(JSON.stringify(err));
             } else {
-                context.succeed({ status: 200 });
+                context.succeed({ status: 200, data: returnData });
             }
         });
     } else {

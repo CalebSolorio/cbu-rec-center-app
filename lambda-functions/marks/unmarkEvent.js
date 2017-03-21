@@ -36,7 +36,7 @@ exports.handler = function(event, context, callback) {
             }, function(userId, next) {
                 unmark(userId, event.eventId, next);
             }, function(next) {
-                virality.update(eventId, next);
+                virality.update(event.eventId, next);
              }
         ], function(err) {
             if(err) {

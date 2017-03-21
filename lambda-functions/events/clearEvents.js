@@ -1,4 +1,4 @@
-console.log('Loading clearSchedule function...');
+console.log('Loading clearEvents function...');
 
 /*
     This removes old events and hours from DynamoDB.
@@ -101,21 +101,37 @@ exports.handler = function(event, context, callback) {
 
                     data.Items.forEach(function(item, index) {
                         if (Date.parse(item.date) < time) {
-                            // Set to delete tokens more than 30 days old
-                            params = {
-                                TableName: table,
-                                Key: {
-                                    date: item.id
-                                },
-                                Limit: 1,
-                            };
-
-                            // Delete tokens
-                            docClient.delete(params, function(err, delData) {
+                            async.parallel([
+                                function(next) {
+                                    var eventParams = {
+                                        TableName: table,
+                                        Key: {
+                                            id: item.id
+                                        },
+                                    };
+                                    docClient.delete(eventParams, next);
+                                }, function(next) {
+                                    var markParams = {
+                                        TableName: "rec_center_marks",
+                                        Key: {
+                                            event_id: item.id
+                                        },
+                                    };
+                                    docClient.delete(markParams, next);
+                                }, function(next) {
+                                    var viralityParams = {
+                                        TableName: "rec_center_virality",
+                                        Key: {
+                                            event_id: item.id
+                                        },
+                                    };
+                                    docClient.delete(viralityParams, next);
+                                }
+                            ], function(err) {
                                 if (err) {
                                     var response = {
                                         status: 500,
-                                        message: "Unable to delete event :("
+                                        message: "Unable to delete event data :("
                                     };
                                     callback(response);
                                 } else {
@@ -145,5 +161,5 @@ exports.handler = function(event, context, callback) {
             };
             context.succeed(response);
         }
-    })
+    });
 };

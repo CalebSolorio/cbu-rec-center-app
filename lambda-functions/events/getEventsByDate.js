@@ -41,11 +41,11 @@ exports.handler = function(event, context, callback) {
             // Get the associated info about the user.
             docClient.get(params, function(err, data) {
                 if (err) {
-                    var response = {
+                    var errResponse = {
                         status: 500,
                         message: "Unable to get hours :("
                     };
-                    next(response);
+                    next(errResponse);
                 } else {
                     if (data.Item) {
                         var returnData = {
@@ -69,43 +69,48 @@ exports.handler = function(event, context, callback) {
                             if(err) {
                                 var response = {
                                     status: 500,
-                                    message: "Unable to get events :("
+                                    message: "Unable to get scan events :("
                                 };
                                 next(response);
                             } else {
+                                // returnData.items = events.Items;
+                                //
+                                // next(null, returnData);
+
                                 returnData.items = [];
 
                                 events.Items.forEach(function(element, index, arr) {
                                     var params = {
                                         TableName : "rec_center_marks",
                                         ProjectionExpression:"user_id",
-                                        KeyConditionExpression: "event_id = :id",
+                                        FilterExpression: "event_id = :id",
                                         ExpressionAttributeValues: {
                                             ":id": element.id
                                         }
                                     };
 
-                                    docClient.query(params, function(err, markData) {
+                                    docClient.scan(params, function(err, markData) {
                                         if (err) {
+                                            console.log("err", err);
                                             var response = {
                                                 status: 500,
-                                                message: "Unable to get events :("
+                                                message: "Unable to query marks :("
                                             };
                                             next(response);
                                         } else {
                                             var item = {
-                                                details: eventData.Item,
+                                                details: data.Item,
                                                 marks: markData.Items
                                             };
 
                                             returnData.items.push(item);
 
                                             if(index + 1 == events.Count) {
-                                                next(null, events);
+                                                next(null, returnData);
                                             }
                                         }
                                     });
-                                }
+                                });
                             }
                         });
 

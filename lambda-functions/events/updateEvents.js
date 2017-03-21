@@ -289,7 +289,7 @@ function saveEvents(data, callback) {
                             Key: {
                                 "date": day.date
                             },
-                            UpdateExpression: "set #o = :o, " + "#c = :c",
+                            UpdateExpression: "set #o = :o, #c = :c",
                             ExpressionAttributeNames: {
                                 "#o": "hours.open",
                                 "#c": "hours.close"
@@ -407,7 +407,25 @@ function saveEvents(data, callback) {
                                             status: 500,
                                             message: "Unable to insert new event :("
                                         };
-                                        callback(response);
+                                    } else {
+
+                                        var viralityParams = {
+                                            TableName: "rec_center_virality",
+                                            Item: {
+                                                event_id: event.id,
+                                                score: 0
+                                            }
+                                        };
+
+                                        docClient.put(viralityParams, function(err) {
+                                            if (err) {
+                                                var response = {
+                                                    status: 500,
+                                                    message: "Unable to create virality score :("
+                                                };
+                                                callback(response);
+                                            }
+                                        });
                                     }
                                 });
                             }

@@ -25,14 +25,14 @@ module.exports = {
      */
     update: function(eventId, callback) {
         // Connect to DynamoDB
-        var docClient = new AWS.DynamoDB.DocumentClient();
+        var docClient = new aws.DynamoDB.DocumentClient();
 
         async.waterfall([
             function(next) {
                 // Prepare the statement
                 var params = {
-                    TableName: "rec_center_virality",
-                    KeyConditionExpression: "event_id=:id",
+                    TableName: "rec_center_marks",
+                    FilterExpression: "event_id=:id",
                     ExpressionAttributeValues: {
                         ":id": eventId
                     }
@@ -43,11 +43,11 @@ module.exports = {
                     if (err) {
                         var errResponse = {
                             status: 500,
-                            message: "Unable to get the user's profile :("
+                            message: "Unable to get query event marks :("
                         };
                         next(errResponse);
                     } else {
-                        next(data.Count);
+                        next(null, data.Count);
                     }
                 });
             }, function(markNum, next) {
@@ -59,12 +59,12 @@ module.exports = {
                     },
                     UpdateExpression: "set score=:s",
                     ExpressionAttributeValues: {
-                        ":s": markNum >= 1 ? 10 * math.log10(markNum + 1) : 1
+                        ":s": markNum >= 1 ? 10 * math.log10(markNum + 1) : 0
                     }
                 };
 
                 // Connect to DynamoDB
-                var docClient = new AWS.DynamoDB.DocumentClient();
+                var docClient = new aws.DynamoDB.DocumentClient();
 
                 // Update score
                 docClient.update(params, function(err, data) {
@@ -92,7 +92,7 @@ module.exports = {
      */
     getMostViral: function(start, callback) {
         // Connect to DynamoDB
-        var docClient = new AWS.DynamoDB.DocumentClient();
+        var docClient = new aws.DynamoDB.DocumentClient();
 
         async.waterfall([
             function(wNext) {
@@ -129,12 +129,13 @@ module.exports = {
                 var data = [];
 
                 for (var i = 0; i < events.length; i++) {
-                    var startTime = Date.parse(event[i].start.dateTime).getTime();
+                    var startTime = Date.parse(events[i].start.dateTime);
+
                     for (var j = 0; j < scores.length; j++) {
                         if (events[i].id == scores[j].event_id) {
-                            var tts = startTime - currentTime - (5 * 60 * 1000);
+                            var tts = startTime - currentTime;
                             if (tts > 0) {
-                                var timeScore = 10 - math.log(math.abs(tts));
+                                var timeScore = 10 - math.log10(tts);
 
                                 var item = {
                                     score: scores[j].score + timeScore,
@@ -143,27 +144,27 @@ module.exports = {
 
                                 data.push(item);
                             }
-                            delete scores[j];
+                            scores.splice(j, 1);
                             break;
                         }
                     }
                 }
 
-                quickSort(data, 0, data.length - 1, wNext);
+                data = quickSort(data, 0, data.length - 1);
 
                 if(start < data.length) {
                     var end = start + 30 < data.length ? start + 30 : data.length;
 
                     var returnData = {
                         lastEvaluatedKey: end,
-                        items: {}
+                        items: []
                     };
 
                     for (var index = start; index < end; index++) {
-                        returnData.items.push(data[i].event);
+                        returnData.items.push(data[index].event);
                     }
 
-                    callback(null, returnData);
+                    wNext(null, returnData);
                 } else {
                     var response = {
                         status: 404,
@@ -179,10 +180,14 @@ module.exports = {
     }
 };
 
+// Scans and returns data on a given DynamoDB table.
 function scanData(table, callback) {
     var params = {
         TableName: table
     };
+
+    // Connect to DynamoDB
+    var docClient = new aws.DynamoDB.DocumentClient();
 
     docClient.scan(params, function(err, data) {
         if (err) {
@@ -197,29 +202,34 @@ function scanData(table, callback) {
     });
 }
 
+// Uses the quicksort algorithm to sort events by virality.
 // Structure copied from http://www.java2novice.com/java-sorting-algorithms/quick-sort/
 function quickSort(data, lowerIndex, higherIndex) {
+    var returnData = data;
     var i = lowerIndex;
     var j = higherIndex;
 
     // calculate pivot number, I am taking pivot as middle index number
-    var pivot = data[lowerIndex + (higherIndex - lowerIndex) / 2];
+    var pivot = returnData[math.floor(lowerIndex + (higherIndex - lowerIndex) / 2)];
     // Divide into two arrays
     while (i <= j) {
+        // console.log("high:" + returnData[128]);
+        // console.log("high:" + returnData[j]);
         /**
          * In each iteration, we will identify a number from left side which
          * is greater then the pivot value, and also we will identify a number
          * from right side which is less then the pivot value. Once the search
          * is done, then we exchange both numbers.
          */
-        while (data[i].score < pivot.score) {
+        while (returnData[i].score > pivot.score) {
             i++;
         }
-        while (data[j].score > pivot.score) {
+        while (returnData[j].score < pivot.score) {
             j--;
         }
         if (i <= j) {
-            exchangeNumbers(i, j);
+            // console.log("exchange " + i + " & " + j);
+            returnData = exchangeNumbers(returnData, i, j);
             //move index to next position on both sides
             i++;
             j--;
@@ -227,13 +237,19 @@ function quickSort(data, lowerIndex, higherIndex) {
     }
     // call quickSort() method recursively
     if (lowerIndex < j)
-        quickSort(data, lowerIndex, j);
+        returnData = quickSort(returnData, lowerIndex, j);
     if (i < higherIndex)
-        quickSort(data, i, higherIndex);
+        returnData = quickSort(returnData, i, higherIndex);
+
+    return returnData;
 }
 
+// Exchanges two places in an array.
 function exchangeNumbers(data, i, j) {
-    var temp = data[i];
-    data[i] = data[j];
-    data[j] = temp;
+    var returnData = data;
+    var temp = returnData[i];
+    returnData[i] = returnData[j];
+    returnData[j] = temp;
+
+    return returnData;
 }
