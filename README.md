@@ -4,7 +4,7 @@
 
 ## API Resources
 - ##### [/code](#code):
-   - ###### [/send]("#code-send") : Send verification code.
+   - ###### [/send](#code-send) : Send verification code.
    - ###### [/resend]("#code-resend") : Resend verification code.
    - ###### [/verify]("#code-verify") : Verify verification code.
 - ##### [/events]("#events"):
