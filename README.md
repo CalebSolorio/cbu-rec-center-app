@@ -376,7 +376,7 @@ Calling this resource will get info on a specific user. </br>
 }
 ```
 ## PUT
-Calling this resource will update information on a specific user. </br>
+Calling this resource will update information on a specific user. This resource will delete the given token from the database after updating. This forces the user to log in an additional time for a disposable token if they would like to change sensitive information. </br>
 **URL Query Strings:** None </br>
 **Headers:** 
 - authorizationToken : The JSON token given at the time of logging in.
