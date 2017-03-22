@@ -1,5 +1,7 @@
 # CBU REC Center App
 
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/25271c39509898551879)
+
 #### API Endpoint: https://1fgs4l61r4.execute-api.us-east-1.amazonaws.com/Sprint2
 
 ## API Resources
