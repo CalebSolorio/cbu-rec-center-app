@@ -99,7 +99,7 @@ exports.handler = function(event, context, callback) {
                                             next(response);
                                         } else {
                                             var item = {
-                                                details: data.Item,
+                                                details: element,
                                                 marks: markData.Items
                                             };
 
