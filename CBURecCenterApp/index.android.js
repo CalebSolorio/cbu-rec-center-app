@@ -4,10 +4,11 @@ import HomePage from './src/pages/HomePage';
 import CalendarPage from './src/pages/CalendarPage';
 import DiscoverPage from './src/pages/DiscoverPage';
 import ErrorPage from './src/pages/ErrorPage';
-import EventsPage from './src/pages/EventsPage';
 import InfoPage from './src/pages/InfoPage';
 import ProfilePage from './src/pages/ProfilePage';
-import SettingsPage from './src/pages/SettingsPage';
+import LoginPage from './src/pages/LoginPage';
+import RegisterPage from './src/pages/RegisterPage';
+import RegisterEmail from './src/pages/RegisterEmail';
 
 export default class CBURecCenterApp extends Component {
 
@@ -19,34 +20,37 @@ export default class CBURecCenterApp extends Component {
     renderScene(route, navigator){
         switch(route.name){
             case 'Home':
-                return <HomePage navigator={navigator} />
+                return <HomePage navigator={navigator} token={route.token}/>
                 break;
             case 'Calendar':
-                return <CalendarPage navigator={navigator} />
-                break;
-            case 'Events':
-                return <EventsPage navigator={navigator} />
+                return <CalendarPage navigator={navigator} token={route.token}/>
                 break;
             case 'Discover':
-                return <DiscoverPage navigator={navigator} />
+                return <DiscoverPage navigator={navigator} token={route.token}/>
                 break;
             case 'Profile':
-                return <ProfilePage navigator={navigator} />
-                break;
-            case 'Settings':
-                return <SettingsPage navigator={navigator} />
+                return <ProfilePage navigator={navigator} token={route.token}/>
                 break;
             case 'Info':
-                return <InfoPage navigator={navigator} />
+                return <InfoPage navigator={navigator} token={route.token}/>
+                break;
+            case 'Login':
+                return <LoginPage navigator={navigator} />
+                break;
+            case 'Register':
+                return <RegisterPage navigator={navigator} email={route.email}/>
+                break;
+            case 'RegisterEmail':
+                return <RegisterEmail navigator={navigator} />
                 break;
             default:
-                return <ErrorPage navigator={navigator} />
+                return <ErrorPage navigator={navigator} token={route.token}/>
         }
     }
     render() {
         return (
           <Navigator
-            initialRoute={{name: 'Home'}}
+            initialRoute={{name: 'Login'}}
             renderScene={this.renderScene}
           />
         );

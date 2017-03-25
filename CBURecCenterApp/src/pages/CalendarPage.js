@@ -16,7 +16,6 @@ constructor(props) {
 
     async componentWillMount() { this.setState(
         {data: await Api.getDates()},
-
         )
     }
 
@@ -66,12 +65,3 @@ constructor(props) {
         );
       }
     }
-
-const styles = StyleSheet.create({
-  indicator: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 80
-  }
-});
