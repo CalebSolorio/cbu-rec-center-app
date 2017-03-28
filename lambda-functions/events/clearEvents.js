@@ -51,7 +51,6 @@ exports.handler = function(event, context, callback) {
                                 Key: {
                                     date: item.date
                                 },
-                                Limit: 1,
                             };
 
                             // Delete tokens

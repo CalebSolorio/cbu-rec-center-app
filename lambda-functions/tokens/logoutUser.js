@@ -59,7 +59,6 @@ function deleteToken(token, callback) {
             Key: {
                 "token_hash": tokenHash
             },
-            Limit: 1,
             ReturnValues: "ALL_OLD",
         };
 

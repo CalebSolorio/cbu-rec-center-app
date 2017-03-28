@@ -33,7 +33,6 @@ exports.handler = function(event, context, callback) {
         ExpressionAttributeValues: {
             ":t": time,
         },
-        Limit: 1
     };
 
     // Execute the query
@@ -54,7 +53,6 @@ exports.handler = function(event, context, callback) {
                         Key: {
                             email: item.email
                         },
-                        Limit: 1,
                     };
 
                     // Delete tokens

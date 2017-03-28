@@ -248,7 +248,6 @@ function dynamoDbUpload(item, callback) {
         ExpressionAttributeValues: {
             ":e": item.email,
         },
-        Limit: 1
     };
 
     docClient.scan(params, function(err, data) {

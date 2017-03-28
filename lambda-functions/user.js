@@ -37,7 +37,6 @@ module.exports = {
                 Key: {
                     token_hash: hashedToken
                 },
-                Limit: 1
             };
 
             // Execute the query

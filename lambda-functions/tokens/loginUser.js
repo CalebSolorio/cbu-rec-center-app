@@ -83,7 +83,6 @@ function authenticate(body, callback) {
         ExpressionAttributeValues: {
             ":e": email,
         },
-        Limit: 1
     };
 
     // Execute the query
