@@ -10,7 +10,8 @@ export default class HomeBox extends Component {
 
     navigate(name){
         this.props.navigator.push({
-            name
+            name: name,
+            token: this.props.token
         })
     }
 
