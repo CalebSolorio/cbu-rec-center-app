@@ -18,7 +18,7 @@ aws.config.update({
 });
 
 exports.handler = function(event, context, callback) {
-    codeMatch(event.email, event.code, function(err, matches) {
+    codeMatch(event.email.toLowerCase(), event.code, function(err, matches) {
         if(err) {
             context.fail(JSON.stringify(err));
         } else {

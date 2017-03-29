@@ -22,7 +22,7 @@ aws.config.update({
 var docClient = new aws.DynamoDB.DocumentClient();
 
 exports.handler = function(event, context, callback) {
-    var email = event.email;
+    var email = event.email.toLowerCase();
 
     if(validateEmail(email)){
         codeExists(email, function(err, doesExist) {

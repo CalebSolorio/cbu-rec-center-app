@@ -33,6 +33,7 @@ var docClient = new aws.DynamoDB.DocumentClient();
 exports.handler = function(event, context, callback) {
     // Parse the details that we care about
     var data = _.pick(event, "email", "password", "name", "description");
+    data.email = data.email.toLowerCase();
 
     if (data.email && data.password && event.code) {
         if (data.password.length >= 6 && data.password.length <= 128 &&

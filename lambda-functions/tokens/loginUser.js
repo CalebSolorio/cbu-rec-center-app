@@ -74,7 +74,7 @@ function authenticate(body, callback) {
     }
 
     var table = "rec_center_users";
-    var email = body.email;
+    var email = body.email.toLowerCase();
 
     // Prepare the scan
     var params = {
