@@ -5,11 +5,11 @@
 #### API Endpoint: https://1fgs4l61r4.execute-api.us-east-1.amazonaws.com/Sprint2
 
 ## API Resources
-- ##### [/code](#code):
+- ##### [/code](#code) :
    - ###### [/send](#code-send) : Send verification code.
    - ###### [/resend](#code-resend) : Resend verification code.
    - ###### [/verify](#code-verify) : Verify verification code.
-- ##### [/events](#events):
+- ##### [/events](#events) :
     - ###### [/date](#events-date): Get events by date.
     - ###### [/viral](#events-viral): Get events by virality.
 - ##### [/login](#login) : Log users in and out.
@@ -338,14 +338,16 @@ Calling this resource will get info on a specific user. </br>
 **Successful Response Example:**
 ```
 {
-  "status": 200
+  "id": "eb7e8470-1417-11e7-9f8c-cf70365110ad",
+  "description": "I don't know how to end movie franchises.",
+  "name": "Captain Jack Sparrow"
 }
 ```
 **Unsuccessful Response Example:**
 ```
 {
-  "status": 404,
-  "message": "No event found."
+   "status": 401,
+   "message": "Not a valid token. Access Denied."
 }
 ```
 ## POST
