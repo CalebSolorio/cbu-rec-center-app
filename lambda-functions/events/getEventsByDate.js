@@ -73,10 +73,6 @@ exports.handler = function(event, context, callback) {
                                 };
                                 next(response);
                             } else {
-                                // returnData.items = events.Items;
-                                //
-                                // next(null, returnData);
-
                                 returnData.items = [];
 
                                 events.Items.forEach(function(element, index, arr) {
@@ -105,7 +101,7 @@ exports.handler = function(event, context, callback) {
 
                                             returnData.items.push(item);
 
-                                            if(index + 1 == events.Count) {
+                                            if(returnData.items.length == events.Count) {
                                                 next(null, returnData);
                                             }
                                         }
