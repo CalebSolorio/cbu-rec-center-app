@@ -75,38 +75,41 @@ exports.handler = function(event, context, callback) {
                             } else {
                                 returnData.items = [];
 
-                                events.Items.forEach(function(element, index, arr) {
-                                    var params = {
-                                        TableName : "rec_center_marks",
-                                        ProjectionExpression:"user_id",
-                                        FilterExpression: "event_id = :id",
-                                        ExpressionAttributeValues: {
-                                            ":id": element.id
-                                        }
-                                    };
+                                if(events.Count > 0) {
+                                  events.Items.forEach(function(element, index, arr) {
+                                      var params = {
+                                          TableName : "rec_center_marks",
+                                          ProjectionExpression:"user_id",
+                                          FilterExpression: "event_id = :id",
+                                          ExpressionAttributeValues: {
+                                              ":id": element.id
+                                          }
+                                      };
 
-                                    docClient.scan(params, function(err, markData) {
-                                        if (err) {
-                                            console.log("err", err);
-                                            var response = {
-                                                status: 500,
-                                                message: "Unable to query marks :("
-                                            };
-                                            next(response);
-                                        } else {
-                                            var item = {
-                                                details: element,
-                                                marks: markData.Items
-                                            };
+                                      docClient.scan(params, function(err, markData) {
+                                          if (err) {
+                                              var response = {
+                                                  status: 500,
+                                                  message: "Unable to query marks :("
+                                              };
+                                              next(response);
+                                          } else {
+                                              var item = {
+                                                  details: element,
+                                                  marks: markData.Items
+                                              };
 
-                                            returnData.items.push(item);
+                                              returnData.items.push(item);
 
-                                            if(returnData.items.length == events.Count) {
-                                                next(null, returnData);
-                                            }
-                                        }
-                                    });
-                                });
+                                              if(returnData.items.length == events.Count) {
+                                                  next(null, returnData);
+                                              }
+                                          }
+                                      });
+                                  });
+                                } else {
+                                  next(null, returnData);
+                                }
                             }
                         });
 
