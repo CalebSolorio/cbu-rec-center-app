@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { View, Text, TextInput, StyleSheet, Button} from 'react-native';
+import { View, Text, Alert,TextInput, StyleSheet, Button} from 'react-native';
 import Api from '../Utility/Api';
 import styles from '../Utility/styles'
 
@@ -11,6 +11,7 @@ export default class RegisterPage extends Component {
         this.state = {
             response:null,
             password: null,
+            Cpassword: null,
             Vcode: null,
             name: null
           };
@@ -25,36 +26,40 @@ export default class RegisterPage extends Component {
 
       //Verifies code/email match, registers the user, and logs them in
       submitRegister(){
-        Api.verifyEmail(this.props.email, this.state.Vcode).then((Vres) => {
+        Api.verifyEmail(this.props.email, this.state.Vcode).then((Vres) => { //verify email
             if(Vres.matches === true){
                 console.log("Verified")
-                 Api.register(
-                    this.state.Vcode,
-                    this.props.email,
-                    this.state.password,
-                    this.state.name
-                    ).then((Rres) => {
-                    console.log(Rres.status + " " +Rres.message)
-                    if(Rres.status === 200){
-                         Api.login(name, this.state.password).then((Lres) => {
-                            console.log(Lres.status + " " + Lres.message)
-                            if(Lres.status === 200){
-                                this.setState({response: Lres.authorizationToken});
-                                this.navigate('Home');
-                            }
-                            else{
-                                return(
-                                    <Text>"Invalid username/password combo"</Text>
-                                )
-                            }
-                        })
-                    }
-                    else{
-                        return(
-                            <Text>"Error"</Text>
-                        )
-                    }
-                })
+                if(this.state.password === this.state.Cpassword) {
+                     Api.register(    //register
+                        this.state.Vcode,
+                        this.props.email,
+                        this.state.password,
+                        this.state.name
+                        ).then((Rres) => {
+                        console.log(Rres.status + " " +Rres.message)
+                        if(Rres.status === 200){  //if registration is successful, log in
+                             Api.login(this.state.name, this.state.password).then((Lres) => {
+                                console.log(Lres.status + " " + Lres.message)
+                                if(Lres.status === 200){   //if log in is succesful, navigate home
+                                    this.setState({response: Lres.authorizationToken});
+                                    this.navigate('Home');
+                                }
+                                else{
+                                    Alert.alert("Invalid username/password combo", " ");
+                                }
+                            })
+                        }
+                        else{
+                            Alert.alert("Registration unsuccessful", "please ensure all information is correct is correct");
+                        }
+                    })
+                }
+                else{
+                    Alert.alert("Passwords do not match", " ");
+                }
+            }
+            else{
+                Alert.alert("Registration unsuccessful", "please ensure validation code is correct");
             }
         })
       }
@@ -82,6 +87,14 @@ export default class RegisterPage extends Component {
                     value={this.state.password}
                     autoCorrect = {false}
                     placeholder = {'password'}
+                    secureTextEntry={ true }
+                />
+                <TextInput
+                    style={styles.textField}
+                    onChangeText={(Cpassword) => this.setState({Cpassword})}
+                    value={this.state.Cpassword}
+                    autoCorrect = {false}
+                    placeholder = {'Confirm Password'}
                     secureTextEntry={ true }
                 />
                 <Button

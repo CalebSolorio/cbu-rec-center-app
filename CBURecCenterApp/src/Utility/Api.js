@@ -1,8 +1,13 @@
 var Api = {
 
-    getDates(){
-        var url = 'https://1fgs4l61r4.execute-api.us-east-1.amazonaws.com/Sprint2/events/date';
-        return fetch(url)
+    getDate(query, token){
+        var url = 'https://1fgs4l61r4.execute-api.us-east-1.amazonaws.com/Sprint2/events/date?date='+query;
+        return fetch(url, {
+            method: 'GET',
+            headers: {
+                authorizationToken: token
+            },
+        })
             .then((res) => res.json());
     },
 

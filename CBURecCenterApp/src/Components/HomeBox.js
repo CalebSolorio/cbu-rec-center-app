@@ -11,7 +11,8 @@ export default class HomeBox extends Component {
     navigate(name){
         this.props.navigator.push({
             name: name,
-            token: this.props.token
+            token: this.props.token,
+            id: this.props.id
         })
     }
 

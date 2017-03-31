@@ -12,7 +12,7 @@ export default class HomePage extends Component {
         <Header pageName="Home" navigator={this.props.navigator}/>
         <View style={styles.Rows}>
             <HomeBox title="Calendar" navigator={this.props.navigator} token={this.props.token}/>
-            <HomeBox title="Profile" navigator={this.props.navigator} token={this.props.token}/>
+            <HomeBox title="Profile" navigator={this.props.navigator} token={this.props.token} id={this.props.id}/>
         </View>
         <View style={styles.Rows}>
             <HomeBox title="Info" navigator={this.props.navigator} token={this.props.token}/>

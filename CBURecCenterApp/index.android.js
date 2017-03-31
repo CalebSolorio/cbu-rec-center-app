@@ -20,7 +20,7 @@ export default class CBURecCenterApp extends Component {
     renderScene(route, navigator){
         switch(route.name){
             case 'Home':
-                return <HomePage navigator={navigator} token={route.token}/>
+                return <HomePage navigator={navigator} token={route.token} id={route.id}/>
                 break;
             case 'Calendar':
                 return <CalendarPage navigator={navigator} token={route.token}/>
@@ -29,7 +29,7 @@ export default class CBURecCenterApp extends Component {
                 return <DiscoverPage navigator={navigator} token={route.token}/>
                 break;
             case 'Profile':
-                return <ProfilePage navigator={navigator} token={route.token}/>
+                return <ProfilePage navigator={navigator} token={route.token} id={route.id}/>
                 break;
             case 'Info':
                 return <InfoPage navigator={navigator} token={route.token}/>

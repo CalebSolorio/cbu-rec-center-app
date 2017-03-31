@@ -15,7 +15,15 @@ var styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         height: 80
-      }
+      },
+    loginButton: {
+        marginVertical: 5,
+    },
+    HOP: {
+        fontWeight: "bold",
+        fontSize: 20,
+        color: 'black'
+    }
 });
 
 module.exports = styles;
