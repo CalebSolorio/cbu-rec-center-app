@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { View, Text, ListView, StyleSheet, TouchableHighlight, ActivityIndicator} from 'react-native';
+import { View, Image, Text, ListView, StyleSheet, TouchableHighlight, ActivityIndicator} from 'react-native';
 import Header from '../Components/Header';
 import Api from '../Utility/Api';
 import styles from '../Utility/styles';
@@ -57,25 +57,25 @@ constructor(props) {
         //once data has finished loading
         return (
           <View style={{flex: 1}}>
-            <Header pageName="Calendar" navigator={this.props.navigator} style={{flex: 1}}/>
-            <View style={{flex: 7}}>
-                <Text> {this.state.data.date} </Text>
-              { this.state.data.items.map((item) => (
-                <View>
-                  <Text>{item.details.title}</Text>
-                  <Text>{item.details.start.dateTime} </Text>
-                  <Text></Text>
+            <Header pageName={this.state.data.date} navigator={this.props.navigator} style={{flex: 1}}/>
+            <View style={{flex: 9}}>
+                <View style={styles.Calendar_Col}>
+                    <TouchableHighlight onPress={() => this.previousDay()} style={styles.Calendar_Nav}>
+                         <Image source={{uri:"https://cdn4.iconfinder.com/data/icons/ionicons/512/icon-ios7-arrow-left-128.png"}} style={styles.Calendar_Img}/>
+                    </TouchableHighlight>
+                    <View style={styles.Calendar_Obj} >
+                      { this.state.data.items.map((item) => (
+                        <View>
+                          <Text>{item.details.title}</Text>
+                          <Text>{item.details.start.dateTime} </Text>
+                          <Text></Text>
+                        </View>
+                      ))}
+                    </View>
+                    <TouchableHighlight onPress={() => this.nextDay()} style={styles.Calendar_Nav}>
+                        <Image source={{uri:"https://cdn4.iconfinder.com/data/icons/ionicons/512/icon-ios7-arrow-right-128.png"}}  style={styles.Calendar_Img}/>
+                    </TouchableHighlight>
                 </View>
-              ))}
-            </View>
-            <View style={{flex: 2, flexDirection: 'row'}}>
-                <TouchableHighlight onPress={() => this.previousDay()} style={{flex: 2}}>
-                    <Text> Previous Day </Text>
-                </TouchableHighlight>
-                <TouchableHighlight onPress={() => this.nextDay()} style={{flex: 2}}>
-                    <Text> Next Day </Text>
-                </TouchableHighlight>
-
             </View>
           </View>
         );

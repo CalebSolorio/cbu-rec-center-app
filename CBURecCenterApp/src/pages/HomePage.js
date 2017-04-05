@@ -7,6 +7,7 @@ import styles from '../Utility/styles'
 export default class HomePage extends Component {
 
   render() {
+  console.log(this.props.id + " home id")
     return (
       <View style= {{flex:1, flexDirection: 'column'}}>
         <Header pageName="Home" navigator={this.props.navigator}/>

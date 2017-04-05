@@ -23,7 +23,28 @@ var styles = StyleSheet.create({
         fontWeight: "bold",
         fontSize: 20,
         color: 'black'
+    },
+    Calendar_Col: {
+        flex: 1,
+        flexDirection: 'row',
+
+    },
+    Calendar_Obj: {
+        alignItems: 'center',
+        flex: 7,
+
+    },
+    Calendar_Nav: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        flex: 1
+    },
+    Calendar_Img: {
+        width: 50,
+        height: 50
     }
+
+
 });
 
 module.exports = styles;

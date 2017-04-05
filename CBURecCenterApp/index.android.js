@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AppRegistry, Navigator } from 'react-native';
+import { BackAndroid, ActivityIndicator, AsyncStorage, AppRegistry, Navigator } from 'react-native';
 import HomePage from './src/pages/HomePage';
 import CalendarPage from './src/pages/CalendarPage';
 import DiscoverPage from './src/pages/DiscoverPage';
@@ -9,12 +9,20 @@ import ProfilePage from './src/pages/ProfilePage';
 import LoginPage from './src/pages/LoginPage';
 import RegisterPage from './src/pages/RegisterPage';
 import RegisterEmail from './src/pages/RegisterEmail';
+import LoadingScreen from './src/pages/LoadingScreen';
+import styles from './src/Utility/styles'
 
 export default class CBURecCenterApp extends Component {
 
     constructor(){
         super()
         this.renderScene = this.renderScene.bind(this)
+        this.state=  {
+            Token: null,
+            id: null,
+            check1: false,
+            check2: false
+        };
     }
 
     renderScene(route, navigator){
@@ -43,17 +51,62 @@ export default class CBURecCenterApp extends Component {
             case 'RegisterEmail':
                 return <RegisterEmail navigator={navigator} />
                 break;
+            case 'LoadingScreen':
+                return <LoadingScreen navigator={navigator} token={route.token} id={route.id}/>
+                break;
             default:
                 return <ErrorPage navigator={navigator} token={route.token}/>
         }
     }
+
+    async componentWillMount(){
+        try {
+            //get auth Token
+            await AsyncStorage.getItem("authToken").then((value) => {
+                this.setState({Token: value});
+            })
+            .then(res => {
+                this.setState({check1: true});
+            });
+            //get ID
+            await AsyncStorage.getItem("id").then((value2) => {
+                this.setState({id: value2});
+            })
+            .then(res => {
+                this.setState({check2: true});
+            });
+
+        } catch (error) {
+          // Error retrieving data
+        }
+
+    }
+
     render() {
-        return (
-          <Navigator
-            initialRoute={{name: 'Login'}}
-            renderScene={this.renderScene}
-          />
-        );
+        //until data is finished loading
+        if (this.state.check1 === false || this.state.check2 === false) {
+          return (
+            <ActivityIndicator
+              animating={true}
+              style={styles.indicator}
+              size="large"
+            />
+          );
+        }
+          if (this.state.Token === null){
+            return (
+              <Navigator
+                initialRoute={{name: 'Login'}}
+
+              />
+            );
+          }
+          return (
+            <Navigator
+              initialRoute={{name: 'Home', token: this.state.Token, id: this.state.id}}
+              renderScene={this.renderScene}
+            />
+          );
     }
 }
 

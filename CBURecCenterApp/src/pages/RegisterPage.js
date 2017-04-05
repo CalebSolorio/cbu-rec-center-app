@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { View, Text, Alert,TextInput, StyleSheet, Button} from 'react-native';
+import { View, Keyboard, Text, Alert,TextInput, StyleSheet, Button} from 'react-native';
 import Api from '../Utility/Api';
 import styles from '../Utility/styles'
 
@@ -26,6 +26,7 @@ export default class RegisterPage extends Component {
 
       //Verifies code/email match, registers the user, and logs them in
       submitRegister(){
+        Keyboard.dismiss();
         Api.verifyEmail(this.props.email, this.state.Vcode).then((Vres) => { //verify email
             if(Vres.matches === true){
                 console.log("Verified")

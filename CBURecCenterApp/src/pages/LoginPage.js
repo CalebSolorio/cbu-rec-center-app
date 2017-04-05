@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { View, Text, Alert, TextInput, Button} from 'react-native';
+import { View, Keyboard, AsyncStorage, Text, Alert, TextInput, Button} from 'react-native';
 import Api from '../Utility/Api';
 import styles from '../Utility/styles'
 
@@ -25,14 +25,24 @@ export default class LoginPage extends Component {
           })
       }
 
+      RegisterFunction(){
+        Keyboard.dismiss();
+        this.navigate("RegisterEmail")
+      }
+
+
+
       submitLogin(){
         Api.login(this.state.userName, this.state.password).then((res) => {
             console.log(res.status)
             if(res.status === 200){
+                Keyboard.dismiss();
                 this.setState({response: res.authorizationToken, id: res.id});
-                this.navigate('Home');
+                console.log(this.state.id + " id")
+                this.navigate('LoadingScreen');
             }
             else{
+                Keyboard.dismiss();
                 Alert.alert("Invalid username/password combo", " ");
             }
         })
@@ -41,8 +51,10 @@ export default class LoginPage extends Component {
       devLogin(){
         Api.login("AustinT.Brinegar@calbaptist.edu", "password").then((res) => {
                 if(res.status === 200){
+                    Keyboard.dismiss()
                     this.setState({response: res.authorizationToken, id: res.id});
-                    this.navigate('Home');
+                    console.log(this.state.id + " id")
+                    this.navigate('LoadingScreen');
                 }
         })
       }
@@ -57,6 +69,7 @@ export default class LoginPage extends Component {
                     keyboardType = {'email-address'}
                     autoCorrect = {false}
                     placeholder = {'CBU Email'}
+                    onSubmitEditing={Keyboard.dismiss}
                 />
                 <TextInput
                     style={styles.textField}
@@ -65,6 +78,7 @@ export default class LoginPage extends Component {
                     autoCorrect = {false}
                     placeholder = {'password'}
                     secureTextEntry={ true }
+                    onSubmitEditing={Keyboard.dismiss}
                 />
                 <View style={styles.loginButton} >
                     <Button
@@ -74,7 +88,7 @@ export default class LoginPage extends Component {
                 </View>
                 <View style={styles.loginButton} >
                     <Button style={styles.loginButton}
-                        onPress={() => this.navigate("RegisterEmail")}
+                        onPress={() => this.RegisterFunction()}
                         title="Register"
                     />
                 </View>

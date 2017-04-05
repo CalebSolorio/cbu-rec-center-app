@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { View, Text, TextInput, StyleSheet, Button} from 'react-native';
+import { View, Alert, Keyboard, Text, TextInput, StyleSheet, Button} from 'react-native';
 import Api from '../Utility/Api';
 import styles from '../Utility/styles'
 
@@ -22,12 +22,12 @@ export default class RegisterPage extends Component {
         Api.sendEmail(this.state.email).then((res) => {
             console.log(res.status + " " + this.state.email)
             if(res.status === 200){
+                Keyboard.dismiss();
                 this.navigate('Register');
             }
             else{
-                return(
-                    <Text>"must be valid CBU email"</Text>
-                )
+                Keyboard.dismiss();
+                Alert.alert("Must be a valid @calbaptist.edu email ")
             }
         })
     }
