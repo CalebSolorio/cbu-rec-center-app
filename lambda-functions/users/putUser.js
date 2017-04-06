@@ -478,9 +478,7 @@ function s3Upload(b64String, id, name, callback) {
     var imgBuffer = new Buffer(b64String.replace(/^data:image\/\w+;base64,/, ""), 'base64');
 
     var bucket = "cbu-rec-center-app";
-    var key = "app/images/users/" + id + "/" +
-        (name ? encodeURI(name.replace(" ", "-")) + "-" : "") +
-        "uncompressed.jpg";
+    var key = "app/images/users/" + id + "/uncompressed.jpg";
     var contentType = "image/jpeg";
     var acl = "public-read";
     uploadCount = 0;
@@ -504,9 +502,7 @@ function s3Upload(b64String, id, name, callback) {
     // Upload picture compressed to 400px and 100px
     for (var compressedSize = 400; compressedSize > 0; compressedSize -= 300)
             (function(compressedSize) {
-        key = "app/images/users/" + id + "/" +
-            (name ? encodeURI(name.replace(" ", "-")) + "-" : "") +
-            compressedSize + "px.jpg";
+        key = "app/images/users/" + id + "/" + compressedSize + "px.jpg";
 
         // Compress and upload the image
         compressAndUploadImg(imgBuffer, compressedSize,
