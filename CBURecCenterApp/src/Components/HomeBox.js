@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { View, Text,  StyleSheet, TouchableHighlight } from 'react-native';
+import styles from '../Utility/styles'
 
 export default class HomeBox extends Component {
 
@@ -18,23 +19,10 @@ export default class HomeBox extends Component {
 
   render() {
     return (
-        <TouchableHighlight onPress={() => this.navigate(this.props.title)} style={styles.Box}>
-            <Text style={styles.Text}> {this.props.title}</Text>
+        <TouchableHighlight onPress={() => this.navigate(this.props.title)} style={styles.HomeBox}>
+            <Text style={styles.HomeBox_Txt}> {this.props.title}</Text>
         </TouchableHighlight>
 
     )
   }
 }
-
-const styles = StyleSheet.create({
-    Box: {
-        backgroundColor: 'green',
-        borderColor: 'black',
-        borderWidth: 1,
-        flex: 1
-    },
-    Text: {
-        color: 'white',
-        fontSize:36
-    }
-});

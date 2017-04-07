@@ -1,6 +1,16 @@
 import { StyleSheet } from 'react-native';
 
 var styles = StyleSheet.create({
+    HomeBox: {
+        backgroundColor: 'green',
+        borderColor: 'black',
+        borderWidth: 1,
+        flex: 1
+    },
+    HomeBox_Txt: {
+        color: 'white',
+        fontSize:36
+    },
     Rows: {
         flex: 3,
         flexDirection: 'row'
@@ -19,7 +29,7 @@ var styles = StyleSheet.create({
     loginButton: {
         marginVertical: 5,
     },
-    HOP: {
+    HOP: { //hours of operation
         fontWeight: "bold",
         fontSize: 20,
         color: 'black'
@@ -27,12 +37,10 @@ var styles = StyleSheet.create({
     Calendar_Col: {
         flex: 1,
         flexDirection: 'row',
-
     },
     Calendar_Obj: {
         alignItems: 'center',
         flex: 7,
-
     },
     Calendar_Nav: {
         alignItems: 'center',
@@ -42,6 +50,17 @@ var styles = StyleSheet.create({
     Calendar_Img: {
         width: 50,
         height: 50
+    },
+    Profile: {
+        flexDirection: 'row',
+        flex: 1
+    },
+    Profile_Img: {
+        flex:5
+    },
+    Profile_Info: {
+        flex:5,
+        flexDirection: 'column',
     }
 
 

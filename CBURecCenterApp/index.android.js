@@ -11,6 +11,7 @@ import RegisterPage from './src/pages/RegisterPage';
 import RegisterEmail from './src/pages/RegisterEmail';
 import LoadingScreen from './src/pages/LoadingScreen';
 import styles from './src/Utility/styles'
+import EditProfile from './src/pages/EditProfile';
 
 export default class CBURecCenterApp extends Component {
 
@@ -53,6 +54,9 @@ export default class CBURecCenterApp extends Component {
                 break;
             case 'LoadingScreen':
                 return <LoadingScreen navigator={navigator} token={route.token} id={route.id}/>
+                break;
+            case 'EditProfile':
+                return <EditProfile navigator={navigator} token={route.token} id={route.id}/>
                 break;
             default:
                 return <ErrorPage navigator={navigator} token={route.token}/>
@@ -97,7 +101,7 @@ export default class CBURecCenterApp extends Component {
             return (
               <Navigator
                 initialRoute={{name: 'Login'}}
-
+                renderScene={this.renderScene}
               />
             );
           }

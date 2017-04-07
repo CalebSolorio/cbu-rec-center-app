@@ -99,7 +99,7 @@ export default class RegisterPage extends Component {
                     secureTextEntry={ true }
                 />
                 <Button
-                    onPress={() => this.submitRegister("Home")}
+                    onPress={() => this.submitRegister()}
                     title="Register"
                 />
 
