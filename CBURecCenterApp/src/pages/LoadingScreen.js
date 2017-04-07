@@ -39,8 +39,6 @@ export default class LoadingScreen extends Component {
     }
 
       render(){
-      console.log(this.props.token + "LS token");
-      console.log(this.props.id + "LS id");
         if (this.state.check1 === false && this.state.check2 === false) {
           return (
             <ActivityIndicator

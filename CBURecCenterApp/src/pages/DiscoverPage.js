@@ -6,7 +6,7 @@ export default class DiscoverPage extends Component {
   render() {
     return (
         <View style= {{flex:1, flexDirection: 'column'}}>
-            <Header pageName="Discover" navigator={this.props.navigator}/>
+            <Header pageName="Discover" navigator={this.props.navigator} id={this.props.id} token={this.props.token}/>
             <Text style= {{flex: 9}}> Hi im the Discover Page </Text>
         </View>
     )

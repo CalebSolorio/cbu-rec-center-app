@@ -32,25 +32,25 @@ export default class CBURecCenterApp extends Component {
                 return <HomePage navigator={navigator} token={route.token} id={route.id}/>
                 break;
             case 'Calendar':
-                return <CalendarPage navigator={navigator} token={route.token}/>
+                return <CalendarPage navigator={navigator} token={route.token} id={route.id}/>
                 break;
             case 'Discover':
-                return <DiscoverPage navigator={navigator} token={route.token}/>
+                return <DiscoverPage navigator={navigator} token={route.token} id={route.id}/>
                 break;
             case 'Profile':
                 return <ProfilePage navigator={navigator} token={route.token} id={route.id}/>
                 break;
             case 'Info':
-                return <InfoPage navigator={navigator} token={route.token}/>
+                return <InfoPage navigator={navigator} token={route.token} id={route.id}/>
                 break;
             case 'Login':
-                return <LoginPage navigator={navigator} />
+                return <LoginPage navigator={navigator} id={route.id}/>
                 break;
             case 'Register':
-                return <RegisterPage navigator={navigator} email={route.email}/>
+                return <RegisterPage navigator={navigator} email={route.email} id={route.id}/>
                 break;
             case 'RegisterEmail':
-                return <RegisterEmail navigator={navigator} />
+                return <RegisterEmail navigator={navigator} id={route.id}/>
                 break;
             case 'LoadingScreen':
                 return <LoadingScreen navigator={navigator} token={route.token} id={route.id}/>
@@ -59,7 +59,7 @@ export default class CBURecCenterApp extends Component {
                 return <EditProfile navigator={navigator} token={route.token} id={route.id}/>
                 break;
             default:
-                return <ErrorPage navigator={navigator} token={route.token}/>
+                return <ErrorPage navigator={navigator} token={route.token} id={route.id}/>
         }
     }
 

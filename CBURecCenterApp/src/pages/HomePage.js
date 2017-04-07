@@ -9,14 +9,14 @@ export default class HomePage extends Component {
   render() {
     return (
       <View style= {{flex:1, flexDirection: 'column'}}>
-        <Header pageName="Home" navigator={this.props.navigator}/>
+        <Header pageName="Home" navigator={this.props.navigator} id={this.props.id} token={this.props.token}/>
         <View style={styles.Rows}>
-            <HomeBox title="Calendar" navigator={this.props.navigator} token={this.props.token}/>
+            <HomeBox title="Calendar" navigator={this.props.navigator} token={this.props.token} id={this.props.id} />
             <HomeBox title="Profile" navigator={this.props.navigator} token={this.props.token} id={this.props.id}/>
         </View>
         <View style={styles.Rows}>
-            <HomeBox title="Info" navigator={this.props.navigator} token={this.props.token}/>
-            <HomeBox title="Marked" navigator={this.props.navigator} token={this.props.token}/>
+            <HomeBox title="Info" navigator={this.props.navigator} token={this.props.token} id={this.props.id}/>
+            <HomeBox title="Marked" navigator={this.props.navigator} token={this.props.token} id={this.props.id}/>
         </View>
       <View style={styles.Rows}>
             <Text> "Hello I am the placeholder for the discovery stuff" </Text>

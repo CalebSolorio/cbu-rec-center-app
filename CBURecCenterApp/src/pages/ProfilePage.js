@@ -16,8 +16,8 @@ export default class ProfilePage extends Component {
     navigate(name){
         this.props.navigator.push({
             name: name,
-            token: this.state.response,
-            id: this.state.id
+            token: this.props.token,
+            id: this.props.id
         })
     }
 
@@ -31,8 +31,6 @@ export default class ProfilePage extends Component {
   }
 
   render() {
-          console.log(this.props.id + " id");
-          console.log(this.props.token + " token");
       //until data is finished loading
       if (!this.state.Name || !this.state.Description) {
         return (
@@ -45,7 +43,7 @@ export default class ProfilePage extends Component {
       }
     return (
         <View style= {{flex:1, flexDirection: 'column'}}>
-            <Header pageName="Profile" navigator={this.props.navigator}/>
+            <Header pageName="Profile" navigator={this.props.navigator} id={this.props.id} token={this.props.token}/>
             <View style= {{flex: 9}}>
                 <View style = {styles.Profile}>
                     <Image style={styles.Profile_Img}

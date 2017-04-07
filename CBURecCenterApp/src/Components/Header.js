@@ -16,6 +16,14 @@ export default class Header extends Component {
 
     }
 
+      navigate(name){
+          this.props.navigator.push({
+              name: name,
+              token: this.props.token,
+              id: this.props.id
+          })
+      }
+
       componentDidMount() {
         BackAndroid.addEventListener('hardwareBackPress', this.handleBack);
       }
@@ -28,8 +36,8 @@ export default class Header extends Component {
     if(this.props.pageName !== 'Home'){
         return (
             <View style={styles.bar}>
-                <TouchableHighlight onPress={() => this.props.navigator.pop()} style={styles.back}>
-                    <Text> back </Text>
+                <TouchableHighlight onPress={() => this.navigate("Home")} style={styles.back}>
+                    <Text> Home </Text>
                 </TouchableHighlight>
                 <View style={{flex: 10}}>
                     <Text style={styles.title}>{this.props.pageName}</Text>

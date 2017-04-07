@@ -57,7 +57,7 @@ constructor(props) {
         //once data has finished loading
         return (
           <View style={{flex: 1}}>
-            <Header pageName={this.state.data.date} navigator={this.props.navigator} style={{flex: 1}}/>
+            <Header pageName={this.state.data.date} navigator={this.props.navigator} style={{flex: 1}} id={this.props.id} token={this.props.token}/>
             <View style={{flex: 9}}>
                 <View style={styles.Calendar_Col}>
                     <TouchableHighlight onPress={() => this.previousDay()} style={styles.Calendar_Nav}>

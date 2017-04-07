@@ -7,7 +7,7 @@ export default class InfoPage extends Component {
   render() {
     return (
         <View style= {{flex:1, flexDirection: 'column'}}>
-            <Header pageName="Info" navigator={this.props.navigator}/>
+            <Header pageName="Info" navigator={this.props.navigator} id={this.props.id} token={this.props.token}/>
             <View style= {{flex: 9}}>
                 <Image
                     style={{flex:4}}
