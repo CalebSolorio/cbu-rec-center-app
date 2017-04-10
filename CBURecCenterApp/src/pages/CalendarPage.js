@@ -1,8 +1,10 @@
 import React, { Component, PropTypes } from 'react';
-import { View, Image, Text, ListView, StyleSheet, TouchableHighlight, ActivityIndicator} from 'react-native';
+import { View, Image, Text, ListView, ScrollView, StyleSheet, TouchableHighlight, ActivityIndicator} from 'react-native';
 import Header from '../Components/Header';
 import Api from '../Utility/Api';
+import CalendarItem from '../Components/CalendarItem'
 import styles from '../Utility/styles';
+import moment from 'moment';
 
 
 export default class CalendarPage extends Component {
@@ -23,7 +25,6 @@ constructor(props) {
     async nextDay(){
         newDate = new Date(JSON.parse(this.state.date));
         newDate.setDate(newDate.getDate() + 1);
-        console.log(newDate);
         this.setState({
             date: JSON.stringify(newDate),
             data: await Api.getDate(newDate, this.props.token)
@@ -34,7 +35,6 @@ constructor(props) {
         if(new Date(JSON.parse(this.state.date)) > new Date()){
             newDate = new Date(JSON.parse(this.state.date));
             newDate.setDate(newDate.getDate() - 1);
-            console.log(newDate);
             this.setState({
                 date: JSON.stringify(newDate),
                 data: await Api.getDate(newDate, this.props.token)
@@ -57,20 +57,19 @@ constructor(props) {
         //once data has finished loading
         return (
           <View style={{flex: 1}}>
-            <Header pageName={this.state.data.date} navigator={this.props.navigator} style={{flex: 1}} id={this.props.id} token={this.props.token}/>
+            <Header pageName={moment(this.state.data.date).format("dddd, MMMM Do")} navigator={this.props.navigator} style={{flex: 1}} id={this.props.id} token={this.props.token}/>
             <View style={{flex: 9}}>
                 <View style={styles.Calendar_Col}>
                     <TouchableHighlight onPress={() => this.previousDay()} style={styles.Calendar_Nav}>
                          <Image source={{uri:"https://cdn4.iconfinder.com/data/icons/ionicons/512/icon-ios7-arrow-left-128.png"}} style={styles.Calendar_Img}/>
                     </TouchableHighlight>
                     <View style={styles.Calendar_Obj} >
-                      { this.state.data.items.map((item) => (
-                        <View>
-                          <Text>{item.details.title}</Text>
-                          <Text>{item.details.start.dateTime} </Text>
-                          <Text></Text>
-                        </View>
-                      ))}
+                        <ScrollView>
+                          { this.state.data.items.map((item) => (
+                            <CalendarItem title={item.details.title} startTime={item.details.start.dateTime} endTime={item.details.end.dateTime}
+                                type={item.details.type} id={item.details.id} token={this.props.token}/>
+                          ))}
+                        </ScrollView>
                     </View>
                     <TouchableHighlight onPress={() => this.nextDay()} style={styles.Calendar_Nav}>
                         <Image source={{uri:"https://cdn4.iconfinder.com/data/icons/ionicons/512/icon-ios7-arrow-right-128.png"}}  style={styles.Calendar_Img}/>

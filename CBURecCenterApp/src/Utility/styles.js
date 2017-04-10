@@ -39,7 +39,7 @@ var styles = StyleSheet.create({
         flexDirection: 'row',
     },
     Calendar_Obj: {
-        alignItems: 'center',
+        alignSelf: 'stretch',
         flex: 7,
     },
     Calendar_Nav: {
