@@ -47,7 +47,7 @@ export default class CBURecCenterApp extends Component {
                 return <LoginPage navigator={navigator} id={route.id}/>
                 break;
             case 'Register':
-                return <RegisterPage navigator={navigator} email={route.email} id={route.id}/>
+                return <RegisterPage navigator={navigator} email={route.email} code={route.code} id={route.id}/>
                 break;
             case 'RegisterEmail':
                 return <RegisterEmail navigator={navigator} id={route.id}/>
