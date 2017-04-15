@@ -32,6 +32,10 @@ export default class Header extends Component {
         BackAndroid.removeEventListener('hardwareBackPress', this.handleBack);
       }
 
+      async logout(){
+        this.navigate("Logout");
+      }
+
   render() {
     if(this.props.pageName !== 'Home'){
         return (
@@ -50,6 +54,9 @@ export default class Header extends Component {
             <View style={{flex: 10}}>
                 <Text style={styles.title}>{this.props.pageName}</Text>
             </View>
+            <TouchableHighlight onPress={() => this.logout()} style={styles.back}>
+                <Text> Log out </Text>
+            </TouchableHighlight>
         </View>
     )
   }
