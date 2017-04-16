@@ -1,15 +1,21 @@
 import React, { Component, PropTypes } from 'react';
-import { View, Text, Image, StyleSheet, ActivityIndicator, TouchableHighlight, Button } from 'react-native';
-import Header from '../Components/Header'
-import Api from '../Utility/Api'
-import styles from '../Utility/styles'
+import { ScrollView, View, Text, Image, Picker, StyleSheet, ActivityIndicator,
+    TouchableHighlight, Button, Alert } from 'react-native';
+
+import { Card } from 'react-native-material-design';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import Header from '../Components/Header';
+import Api from '../Utility/Api';
+import CalendarItem from '../Components/CalendarItem'
 
 export default class ProfilePage extends Component {
   constructor(props){
     super(props);
     this.state = {
-        Name: null,
-        Description: null
+        name: null,
+        description: null,
+        data: null,
     }
   }
 
@@ -24,15 +30,104 @@ export default class ProfilePage extends Component {
   async componentWillMount() {
     await Api.getUser(this.props.id, this.props.token).then((value) => {
         this.setState({
-            Name: value.name,
-            Description: value.description
+            name: value.name,
+            description: value.description
         });
     })
+    await Api.getMarks(this.props.token).then((value) => {
+        console.log(JSON.stringify(value));
+        this.setState({ data: value });
+    });
+  }
+
+  async logout(){
+    // this.navigate("Logout");
+    Alert.alert(
+      'Are you sure you want to logout?',
+      'I thought we had something special...',
+      [
+        // {text: 'Ask me later', onPress: () => console.log('Ask me later pressed')},
+        { text: 'Cancel' },
+        { text: "Yes", onPress: () => {
+            AsyncStorage.multiRemove(["token", "id"]).then(() => {
+              this.navigate("Login");
+            })
+          }
+        },
+      ],
+    )
   }
 
   render() {
+      const styles = StyleSheet.create({
+        container: {
+          backgroundColor: '#002554',
+          flex: 1,
+        },
+        indicator: {
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: 80
+        },
+        name: {
+          fontSize: 30,
+          paddingBottom: 5,
+          textAlign: "center",
+        },
+        text: {
+          fontSize: 18,
+          paddingBottom: 5,
+        },
+        input: {
+          height: 70,
+          borderRadius: 2,
+          marginHorizontal: 10,
+          marginVertical: 5,
+          paddingVertical: 5,
+          width: window.width - 30,
+        },
+        picture: {
+          alignSelf: 'center',
+          height: 150,
+          width: 150,
+          marginVertical: 4,
+          borderRadius: 80,
+        },
+        pictureCard: {
+          alignSelf: 'center',
+          height: 160,
+          width: 160,
+          borderRadius: 80,
+          transform: [
+            { translateY: 80 },
+          ],
+          zIndex:1,
+        },
+        buttonView: {
+          flexDirection:'row',
+          justifyContent:'space-between',
+          marginVertical: 10,
+        },
+        iconButton: {
+          marginVertical: 10,
+        },
+        markedTitle: {
+          color: "white",
+          fontSize: 35,
+          marginTop: 15,
+          textAlign: "center",
+        },
+        proTip: {
+          color: "white",
+          fontSize: 20,
+          marginTop: 50,
+          textAlign: "center",
+        }
+      });
+
       //until data is finished loading
-      if (!this.state.Name || !this.state.Description) {
+      if (!this.state.name || !this.state.description) {
         return (
           <ActivityIndicator
             animating={true}
@@ -41,27 +136,57 @@ export default class ProfilePage extends Component {
           />
         );
       }
-    return (
-        <View style= {{flex:1, flexDirection: 'column'}}>
-            <Header pageName="Profile" navigator={this.props.navigator} id={this.props.id} token={this.props.token}/>
-            <View style= {{flex: 9}}>
-                <View style = {styles.Profile}>
-                    <Image style={styles.Profile_Img}
-                        source={{uri : 'https://s3.amazonaws.com/cbu-rec-center-app/app/images/users/' + this.props.id + '/100px.jpg' }}
-                    />
-                    <View style = {styles.Profile_Info}>
-                        <Text style={styles.HOP}> {this.state.Name} </Text>
-                        <Text> {this.state.Description} </Text>
-                    </View>
-                </View>
-                <View style={{flex:5}}>
-                    <Button style={styles.loginButton}
-                        onPress={() => this.navigate("EditProfile")}
-                        title="Edit Profile"
-                    />
-                </View>
+
+      var markedItems =
+        <View>
+          <Text style={ styles.proTip }>Pro Tip: try marking some events
+            you're interested in to keep track of them for later!</Text>
+        </View>;
+
+      if(this.state.data != null) {
+        markedItems =
+        <View>
+          <Text style={ styles.markedTitle }>What I've Marked</Text>
+          <Card>
+            <View>
+              {this.state.data.map((item) => (
+                <CalendarItem key={item.id} markable={false} title={item.title} startTime={item.start.dateTime} endTime={item.end.dateTime}
+                    type={item.type} id={item.id} token={this.props.token}/>
+              ))}
             </View>
-        </View>
-    )
+          </Card>
+        </View>;
+      }
+
+
+      return (
+        <ScrollView
+          style={styles.container}
+          behavior="padding"
+        >
+
+        <Card
+          elevation={4}
+          style={ styles.pictureCard }>
+          <Image source={{uri : 'https://s3.amazonaws.com/cbu-rec-center-app/app/images/users/' + this.props.id + '/uncompressed.jpg' }}
+            style={ styles.picture } resizeMode="cover" />
+        </Card>
+        <Card>
+          <View style={ styles.buttonView }>
+              <Icon name="settings" size={30}
+                color="#A37400" style={ styles.icon }
+                onPress={() => this.navigate("EditProfile")} />
+              <Icon name="exit-to-app" size={30} style={{ alignSelf:"right"}}
+                color="#A37400" style={ styles.icon }
+                onPress={() => this.logout()} />
+          </View>
+          <Card.Body>
+              <Text style={[styles.name, {marginTop: 5 }]}>{ this.state.name }</Text>
+              <Text style={styles.text}>{ this.state.description }</Text>
+          </Card.Body>
+        </Card>
+        { markedItems }
+      </ScrollView>
+    );
   }
 }

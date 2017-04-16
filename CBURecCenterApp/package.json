@@ -7,6 +7,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "async": "^2.3.0",
     "fs": "0.0.1-security",
     "react": "15.4.2",
     "react-native": "^0.41.2",
@@ -14,7 +15,8 @@
     "react-native-keyboard-aware-view": "0.0.12",
     "react-native-material-design": "^0.3.7",
     "react-native-material-design-styles": "^0.2.6",
-    "react-native-material-kit": "^0.4.1"
+    "react-native-material-kit": "^0.4.1",
+    "react-native-vector-icons": "^4.0.1"
   },
   "devDependencies": {
     "babel-jest": "19.0.0",

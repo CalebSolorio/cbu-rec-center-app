@@ -1,8 +1,13 @@
 import React, { Component, PropTypes } from 'react';
-import { View, Text,  Alert, StyleSheet, TouchableHighlight } from 'react-native';
+import { View, Text,  Alert, Dimensions, StyleSheet,
+  TouchableHighlight } from 'react-native';
+
 import moment from 'moment';
+import { Card } from 'react-native-material-design';
+
 import Api from '../Utility/Api';
 
+const window = Dimensions.get('window');
 
 export default class CalendarItem extends Component {
 
@@ -34,24 +39,38 @@ export default class CalendarItem extends Component {
     }
 
     render(){
-        return(
-            <View style={styles.container}>
-                <Text> {this.props.title} </Text>
-                <View style={styles.lowRow}>
-                    <Text style={styles.time}> {this.state.startTime} - {this.state.endTime} </Text>
-                    <TouchableHighlight onPress={() => this.markEvent()} style={styles.mark}>
-                        <Text> Mark {this.props.type} </Text>
-                    </TouchableHighlight>
-                </View>
-            </View>
-        )
+      return(
+          <Card style={{width: window.width - 30}}>
+          <View>
+              <Text> {this.props.title} </Text>
+              <View style={styles.lowRow}>
+                  <Text style={styles.time}> {this.state.startTime} - {this.state.endTime} </Text>
+              </View>
+          </View>
+          </Card>
+      );
+
+      // if(this.props.markable) {
+      //   return(
+      //       <View style={styles.container}>
+      //           <Text> {this.props.title} </Text>
+      //           <View style={styles.lowRow}>
+      //               <Text style={styles.time}> {this.state.startTime} - {this.state.endTime} </Text>
+      //                 <TouchableHighlight onPress={() => this.markEvent()} style={styles.mark}>
+      //                     <Text> Mark {this.props.type} </Text>
+      //                 </TouchableHighlight>
+      //           </View>
+      //       </View>
+      //   );
+      // }
+
     }
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        borderWidth: 1
+        borderWidth: 0
     },
     title: {
         color: 'black',

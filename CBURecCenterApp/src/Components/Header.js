@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { BackAndroid, View, Text, StyleSheet, TouchableHighlight } from 'react-native';
+import { Alert, AsyncStorage, BackAndroid, View, Text, StyleSheet, TouchableHighlight } from 'react-native';
 
 export default class Header extends Component {
 
@@ -33,7 +33,21 @@ export default class Header extends Component {
       }
 
       async logout(){
-        this.navigate("Logout");
+        // this.navigate("Logout");
+        Alert.alert(
+          'Are you sure you want to logout?',
+          'I thought we had something special...',
+          [
+            // {text: 'Ask me later', onPress: () => console.log('Ask me later pressed')},
+            { text: 'Cancel' },
+            { text: "Yes", onPress: () => {
+                AsyncStorage.multiRemove(["token", "id"]).then(() => {
+                  this.navigate("Login");
+                })
+              }
+            },
+          ],
+        )
       }
 
   render() {

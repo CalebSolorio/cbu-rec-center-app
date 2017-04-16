@@ -4,6 +4,7 @@ import { View, Keyboard, AsyncStorage, Text, Alert,
   Dimensions, Animated, Image } from 'react-native';
 
 import { MKTextField, MKButton, MKColor, mdl } from 'react-native-material-kit';
+import async from 'async';
 
 import Api from '../Utility/Api';
 import logo from '../Utility/logo.png';
@@ -17,8 +18,9 @@ export default class LoginPage extends Component {
   constructor(props) {
     super(props);
 
-    const quotes = ["'saaaaah dud'", "muscle milk", "protein shakes", "yoga pants",
-      "six-packs", "reps", "active wear", "squats", "fist bumps", "pylons", "leg days"];
+    const quotes = ["'saaaaah dud'", "muscle milk", "protein shakes",
+      "yoga pants", "six-packs", "reps", "active wear", "squats",
+      "fist bumps", "pylons constructed", "leg days"];
 
     this.state = {
         response: null,
@@ -52,7 +54,7 @@ export default class LoginPage extends Component {
   navigate(name){
       this.props.navigator.push({
           name: name,
-          token: this.state.response,
+          token: this.state.token,
           id: this.state.id
       })
   }
@@ -62,20 +64,41 @@ export default class LoginPage extends Component {
     this.navigate("RegisterEmail")
   }
 
-  submitLogin(){
+  submitLogin() {
+    Keyboard.dismiss();
     Api.login(this.state.userName, this.state.password).then((res) => {
-        console.log(res.status)
-        if(res.status === 200){
-            Keyboard.dismiss();
-            this.setState({response: res.authorizationToken, id: res.id});
-            console.log(this.state.id + " id")
-            this.navigate('LoadingScreen');
-        }
+      if(res.status === 200){
+          var count = 0;
+
+          AsyncStorage.setItem("authToken", res.authorizationToken)
+          .then(() => {
+              this.setState({ token: res.authorizationToken });
+              count++;
+              if(count == 2) {
+                this.navigate("Home");
+              }
+          }).catch(() => {
+            Alert.alert("Dang it! (╯°□°）╯︵ ┻━┻",
+                  "We couldn't save your credentials to your device. Try again.");
+          });;
+
+          AsyncStorage.setItem("id", res.id)
+          .then(() => {
+              this.setState({ id: res.id });
+              count++;
+              if(count == 2) {
+                this.navigate("Home");
+              }
+          }).catch(() => {
+            Alert.alert("Dang it! (╯°□°）╯︵ ┻━┻",
+                  "We couldn't save your credentials to your device. Try again.");
+          });
+      }
         else{
-            Keyboard.dismiss();
-            Alert.alert("Invalid username/password combo", " ");
+            Alert.alert("Invalid username/password combo ¯\\_(ツ)_/¯",
+              "Don't worry, it happens to the best of us. Try again.");
         }
-    })
+    });
   }
 
   render() {
@@ -157,7 +180,7 @@ export default class LoginPage extends Component {
             <View style={styles.button} >
               <Button
                 title="Log In"
-                onPress={() => this.submitLogin()}
+                onPress={ () => this.submitLogin() }
                 color="#A37400"
               />
             </View>

@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
-import { View, Text,  Alert, ScrollView, ActivityIndicator, StyleSheet, TouchableHighlight } from 'react-native';
+import { View, Text,  Alert, ScrollView, ActivityIndicator,
+  StyleSheet, TouchableHighlight } from 'react-native';
 import Api from '../Utility/Api';
 import styles from '../Utility/styles';
 import CalendarItem from '../Components/CalendarItem'

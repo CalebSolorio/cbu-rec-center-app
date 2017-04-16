@@ -9,8 +9,6 @@ import ProfilePage from './src/pages/ProfilePage';
 import LoginPage from './src/pages/LoginPage';
 import RegisterPage from './src/pages/RegisterPage';
 import RegisterEmail from './src/pages/RegisterEmail';
-import LoadingScreen from './src/pages/LoadingScreen';
-import LogoutScreen from './src/pages/LogoutScreen';
 import styles from './src/Utility/styles'
 import EditProfile from './src/pages/EditProfile';
 import MarkedPage from './src/pages/MarkedPage';
@@ -54,14 +52,8 @@ export default class CBURecCenterApp extends Component {
             case 'RegisterEmail':
                 return <RegisterEmail navigator={navigator} id={route.id}/>
                 break;
-            case 'LoadingScreen':
-                return <LoadingScreen navigator={navigator} token={route.token} id={route.id}/>
-                break;
             case 'EditProfile':
                 return <EditProfile navigator={navigator} token={route.token} id={route.id}/>
-                break;
-            case 'Logout':
-                return <LogoutScreen navigator={navigator} token={route.token} id={route.id}/>
                 break;
             case 'Marked':
                 return <MarkedPage navigator={navigator} token={route.token} id={route.id}/>
