@@ -3,7 +3,7 @@ import { View, Keyboard, AsyncStorage, Text, Alert,
   TextInput, StyleSheet, KeyboardAvoidingView, Button,
   Dimensions, Animated, Image } from 'react-native';
 
-import { MKTextField, MKButton, MKColor, mdl } from 'react-native-material-kit';
+import { MKTextField } from 'react-native-material-kit';
 import async from 'async';
 
 import Api from '../Utility/Api';

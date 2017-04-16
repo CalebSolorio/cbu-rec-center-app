@@ -21,9 +21,11 @@ export default class CalendarItem extends Component {
     }
 
     componentWillMount(){
+        const startDate = new Date(this.props.startTime);
         this.setState({
-            startTime: moment(this.props.startTime).format("hh:mm A"),
-            endTime:  moment(this.props.endTime).format("hh:mm A")
+            date: moment(this.props.startTime).format("dddd") + ", " +
+              moment(this.props.startTime).format("MMMM Do"),
+            startTime: moment(this.props.startTime).format("hh:mm A")
         })
     }
 
@@ -38,52 +40,39 @@ export default class CalendarItem extends Component {
           })
     }
 
+// For later
+// <Card style={{ flex: .5 }}>
+
     render(){
+      const styles = StyleSheet.create({
+          card: {
+            marginVertical: 4,
+            backgroundColor: this.props.type == "class" ?
+              "#C1CD23" : "#FF6C00",
+          },
+          title: {
+              color: 'white',
+              fontSize: 30,
+          },
+          bottomRow: {
+            flex: 1,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          },
+          text: {
+              color: 'white',
+              fontSize: 18,
+          },
+      });
+
       return(
-          <Card style={{width: window.width - 30}}>
-          <View>
-              <Text> {this.props.title} </Text>
-              <View style={styles.lowRow}>
-                  <Text style={styles.time}> {this.state.startTime} - {this.state.endTime} </Text>
-              </View>
-          </View>
+          <Card style={ styles.card }>
+            <Text style={ styles.title }> {this.props.title} </Text>
+            <View style={ styles.bottomRow }>
+              <Text style={ styles.text }> {this.state.date} </Text>
+              <Text style={ styles.text }> {this.state.startTime}</Text>
+            </View>
           </Card>
       );
-
-      // if(this.props.markable) {
-      //   return(
-      //       <View style={styles.container}>
-      //           <Text> {this.props.title} </Text>
-      //           <View style={styles.lowRow}>
-      //               <Text style={styles.time}> {this.state.startTime} - {this.state.endTime} </Text>
-      //                 <TouchableHighlight onPress={() => this.markEvent()} style={styles.mark}>
-      //                     <Text> Mark {this.props.type} </Text>
-      //                 </TouchableHighlight>
-      //           </View>
-      //       </View>
-      //   );
-      // }
-
     }
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        borderWidth: 0
-    },
-    title: {
-        color: 'black',
-        textAlign: 'center'
-    },
-    lowRow: {
-        flex:1,
-        flexDirection: 'row'
-    },
-    time: {
-        alignSelf: 'flex-start',
-    },
-    mark: {
-        alignSelf: 'flex-end'
-    }
-});

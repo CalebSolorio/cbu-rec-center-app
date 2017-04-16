@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { ScrollView, View, Text, Image, Picker, StyleSheet, ActivityIndicator,
     TouchableHighlight, Button, Alert } from 'react-native';
 
-import { Card } from 'react-native-material-design';
+import { Card, Divider } from 'react-native-material-design';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import Header from '../Components/Header';
@@ -113,16 +113,18 @@ export default class ProfilePage extends Component {
           marginVertical: 10,
         },
         markedTitle: {
-          color: "white",
-          fontSize: 35,
-          marginTop: 15,
-          textAlign: "center",
+          // color: "white",
+          fontSize: 15,
+          marginTop: 10,
         },
         proTip: {
-          color: "white",
-          fontSize: 20,
-          marginTop: 50,
+          fontSize: 15,
+          marginTop: 5,
           textAlign: "center",
+        },
+        divider: {
+          marginTop: 5,
+          marginBottom: 10,
         }
       });
 
@@ -139,6 +141,7 @@ export default class ProfilePage extends Component {
 
       var markedItems =
         <View>
+          <Divider style={ styles.divider } />
           <Text style={ styles.proTip }>Pro Tip: try marking some events
             you're interested in to keep track of them for later!</Text>
         </View>;
@@ -146,18 +149,17 @@ export default class ProfilePage extends Component {
       if(this.state.data != null) {
         markedItems =
         <View>
-          <Text style={ styles.markedTitle }>What I've Marked</Text>
-          <Card>
-            <View>
-              {this.state.data.map((item) => (
-                <CalendarItem key={item.id} markable={false} title={item.title} startTime={item.start.dateTime} endTime={item.end.dateTime}
-                    type={item.type} id={item.id} token={this.props.token}/>
-              ))}
-            </View>
-          </Card>
+          <Text style={ styles.markedTitle }>Marked</Text>
+          <Divider style={ styles.divider }/>
+          {this.state.data.map((item) => (
+            <CalendarItem key={item.id} markable={false} title={item.title} startTime={item.start.dateTime} endTime={item.end.dateTime}
+                type={item.type} id={item.id} token={this.props.token}/>
+          ))}
         </View>;
       }
 
+// For later.
+// <View style={{ flex: 1, flexDirection: "row" }}>
 
       return (
         <ScrollView
@@ -168,7 +170,8 @@ export default class ProfilePage extends Component {
         <Card
           elevation={4}
           style={ styles.pictureCard }>
-          <Image source={{uri : 'https://s3.amazonaws.com/cbu-rec-center-app/app/images/users/' + this.props.id + '/uncompressed.jpg' }}
+          <Image source={{uri : 'https://s3.amazonaws.com/cbu-rec-center-app/app/images/users/' +
+            this.props.id + '/uncompressed.jpg' }}
             style={ styles.picture } resizeMode="cover" />
         </Card>
         <Card>
@@ -183,9 +186,9 @@ export default class ProfilePage extends Component {
           <Card.Body>
               <Text style={[styles.name, {marginTop: 5 }]}>{ this.state.name }</Text>
               <Text style={styles.text}>{ this.state.description }</Text>
+              { markedItems }
           </Card.Body>
         </Card>
-        { markedItems }
       </ScrollView>
     );
   }
