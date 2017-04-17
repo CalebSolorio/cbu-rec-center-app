@@ -1,27 +1,65 @@
 import React, { Component, PropTypes } from 'react';
-import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
-import Header from '../Components/Header'
-import HomeBox from '../Components/HomeBox'
-import styles from '../Utility/styles'
+import { View, Keyboard, AsyncStorage, Text, Alert,
+  TextInput, StyleSheet, ScrollView, Button,
+  Dimensions, Animated, Image } from 'react-native';
+
+import Swiper from 'react-native-swiper';
+
+import PopularPage from '../pages/PopularPage';
+import InfoPage from '../pages/InfoPage';
+import ProfilePage from '../pages/ProfilePage';
+
+import Api from '../Utility/Api';
+import logo from '../Utility/logo.png';
+
+const window = Dimensions.get('window');
 
 export default class HomePage extends Component {
+  constructor(props){
+   super(props);
+   this.onPress = this.onPress.bind(this);
+  }
+
+  navigate(name){
+      this.props.navigator.push({
+          name: name,
+          token: this.props.token,
+          id: this.props.id
+      })
+  }
+
+  onPress = (x) => {
+    console.log("click");
+    this.refs.slider.scrollBy(x);
+  }
 
   render() {
-    return (
-      <View style= {{flex:1, flexDirection: 'column'}}>
-        <Header pageName="Home" navigator={this.props.navigator} id={this.props.id} token={this.props.token}/>
-        <View style={styles.Rows}>
-            <HomeBox title="Calendar" navigator={this.props.navigator} token={this.props.token} id={this.props.id} />
-            <HomeBox title="Profile" navigator={this.props.navigator} token={this.props.token} id={this.props.id}/>
-        </View>
-        <View style={styles.Rows}>
-            <HomeBox title="Info" navigator={this.props.navigator} token={this.props.token} id={this.props.id}/>
-            <HomeBox title="Marked" navigator={this.props.navigator} token={this.props.token} id={this.props.id}/>
-        </View>
-      <View style={styles.Rows}>
-            <Text> "Hello I am the placeholder for the discovery stuff" </Text>
+    const styles = {
+      wrapper: {
+      },
+      slide: {
+        flex: 1,
+        justifyContent: 'center',
+        backgroundColor: 'transparent'
+      },
+    }
+
+    return(<View>
+        <Swiper ref="slider" style={styles.wrapper} height={window.height}
+          onMomentumScrollEnd={(e, state, context) => console.log('index:', state.index)}
+          paginationStyle={{
+            bottom: -23, left: null, right: 10
+          }} loop>
+            <PopularPage navigator={this.props.navigator}
+              onPress={this.onPress}/>
+            <InfoPage navigator={this.props.navigator}
+              onPress={this.onPress}/>
+            <ProfilePage navigator={this.props.navigator}
+              token={this.props.token}
+              id={this.props.id}
+              onPress={this.onPress} />
+        </Swiper>
       </View>
-    </View>
-    )
+    );
   }
 }

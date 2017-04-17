@@ -97,7 +97,7 @@ export default class CBURecCenterApp extends Component {
             />
           );
         }
-          if (this.state.Token === null){
+          if (this.state.Token === null || this.state.id === null){
             return (
               <Navigator
                 initialRoute={{name: 'Login'}}

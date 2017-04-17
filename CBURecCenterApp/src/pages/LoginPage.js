@@ -33,6 +33,8 @@ export default class LoginPage extends Component {
 
       this.imageHeight = new Animated.Value(IMAGE_HEIGHT);
       this.submitLogin = this.submitLogin.bind(this);
+
+      AsyncStorage.multiRemove(["token", "id"]);
   }
 
   keyboardWillShow(event) {

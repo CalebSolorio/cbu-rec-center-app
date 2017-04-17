@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { ScrollView, View, Text, Image, Picker, StyleSheet, ActivityIndicator,
-    TouchableHighlight, Button, Alert } from 'react-native';
+    AsyncStorage, TouchableHighlight, Button, Alert } from 'react-native';
 
 import { Card, Divider } from 'react-native-material-design';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -19,23 +19,23 @@ export default class ProfilePage extends Component {
     }
   }
 
-    navigate(name){
-        this.props.navigator.push({
-            name: name,
-            token: this.props.token,
-            id: this.props.id
-        })
-    }
+  navigate(name){
+      this.props.navigator.push({
+          name: name,
+          token: this.props.token,
+          id: this.props.id
+      })
+  }
 
   async componentWillMount() {
     await Api.getUser(this.props.id, this.props.token).then((value) => {
-        this.setState({
-            name: value.name,
-            description: value.description
-        });
-    })
+      this.setState({
+          name: value.name,
+          description: value.description
+      });
+    });
+
     await Api.getMarks(this.props.token).then((value) => {
-        console.log(JSON.stringify(value));
         this.setState({ data: value });
     });
   }
@@ -51,7 +51,7 @@ export default class ProfilePage extends Component {
         { text: "Yes", onPress: () => {
             AsyncStorage.multiRemove(["token", "id"]).then(() => {
               this.navigate("Login");
-            })
+            });
           }
         },
       ],
@@ -66,9 +66,10 @@ export default class ProfilePage extends Component {
         },
         indicator: {
             flex: 1,
+            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            height: 80
+            height: 80,
         },
         name: {
           fontSize: 30,
@@ -131,11 +132,17 @@ export default class ProfilePage extends Component {
       //until data is finished loading
       if (!this.state.name || !this.state.description) {
         return (
-          <ActivityIndicator
-            animating={true}
-            style={styles.indicator}
-            size="large"
-          />
+          <View
+            style={styles.container}
+            behavior="padding"
+          >
+            <ActivityIndicator
+              animating={true}
+              style={styles.indicator}
+              size="large"
+              color="#A37400"
+            />
+          </View>
         );
       }
 
