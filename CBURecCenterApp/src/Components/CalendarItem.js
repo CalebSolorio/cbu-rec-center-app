@@ -1,23 +1,31 @@
 import React, { Component, PropTypes } from 'react';
-import { View, Text,  Alert, Dimensions, StyleSheet,
-  TouchableHighlight } from 'react-native';
+import { View, ScrollView, Text,  Alert, Animated, Button, Dimensions,
+  StyleSheet, TouchableHighlight } from 'react-native';
 
 import moment from 'moment';
-import { Card } from 'react-native-material-design';
+import { Card, Ripple } from 'react-native-material-design';
 
 import Api from '../Utility/Api';
 
 const window = Dimensions.get('window');
 
+const COMPACT_HEIGHT = 75;
+const EXPANDED_HEIGHT = window.height / 2;
+
 export default class CalendarItem extends Component {
 
     constructor(props) {
         super(props);
+        console.log(props.description.replace(/\r?\n|\r/g, " "));
         this.state = {
-              date: null,
-              startTime: null,
-              endTime: null,
-            }
+          date: null,
+          startTime: null,
+          endTime: null,
+          marked: props.marked,
+          expand: false,
+          height: new Animated.Value(COMPACT_HEIGHT),
+          // opacity: new Animated.Value(0),
+        };
     }
 
     componentWillMount(){
@@ -25,54 +33,140 @@ export default class CalendarItem extends Component {
         this.setState({
             date: moment(this.props.startTime).format("dddd") + ", " +
               moment(this.props.startTime).format("MMMM Do"),
-            startTime: moment(this.props.startTime).format("hh:mm A")
+            startTime: moment(this.props.startTime).format("hh:mm A"),
+            endTime: moment(this.props.endTime).format("hh:mm A")
         })
     }
 
+    expand() {
+      const expand = !this.state.expand;
+      this.setState({ expand: expand });
+
+      Animated.timing(this.state.height, {
+        duration: 200,
+        toValue: expand ? EXPANDED_HEIGHT : COMPACT_HEIGHT,
+      }).start();
+    }
+
     markEvent(){
+      if(this.state.marked) {
+        Alert.alert(
+          'Are you sure you want to unmark ' + this.props.title + '?',
+          'Senpai pls...',
+          [
+            { text: 'Cancel' },
+            { text: "Yes", onPress: () => {
+                Api.unmarkEvent(this.props.id, this.props.token).then((value) => {
+                    if(value.status === 200){
+                        this.setState({ marked: false });
+                    }
+                    else{
+                      Alert.alert("Error " + value.status + ":", value.message);
+                    }
+                });
+              }
+            },
+          ],
+        );
+      } else {
         Api.markEvent(this.props.id, this.props.token).then((value) => {
             if(value.status === 200){
-                Alert.alert(this.props.title + " has been marked")
+              this.setState({ marked:true });
             }
             else{
-                 Alert.alert("failed to mark event", value.message)
+                 Alert.alert("Error " + value.status + ":", value.message);
             }
-          })
+          });
+      }
     }
 
 // For later
 // <Card style={{ flex: .5 }}>
 
     render(){
+      // console.log(this.height);
       const styles = StyleSheet.create({
           card: {
             marginVertical: 4,
             backgroundColor: this.props.type == "class" ?
-              "#C1CD23" : "#FF6C00",
+              "#A37400" : "#AC451E",
+            // height: this.height,
+            // width: this.state.expand ? window.width : 100,
+            flex: 1,
+            // flexDirection: 'column',
+            justifyContent: 'space-between',
           },
           title: {
               color: 'white',
               fontSize: 30,
           },
           bottomRow: {
-            flex: 1,
+            // flex: 1,
             flexDirection: 'row',
             justifyContent: 'space-between',
           },
           text: {
               color: 'white',
               fontSize: 18,
+              marginBottom: 5,
           },
       });
 
-      return(
-          <Card style={ styles.card }>
-            <Text style={ styles.title }> {this.props.title} </Text>
-            <View style={ styles.bottomRow }>
-              <Text style={ styles.text }> {this.state.date} </Text>
-              <Text style={ styles.text }> {this.state.startTime}</Text>
+      const details = this.state.expand ?
+        <Text style={{color:'white', fontSize: 20 }}>
+          { this.props.description }
+        </Text> : null;
+
+      const bottomRight = this.state.expand ?
+          <View>
+            <Text style={ styles.text }> {this.state.date} </Text>
+            <Text style={ styles.text }> {this.state.startTime} - {this.state.endTime}</Text>
+          </View>
+        :
+          <Text style={ styles.text }>
+            {this.state.date}
+          </Text>;
+
+      const bottomLeft = this.state.expand ?
+          <View style={{
+            flex: 1,
+            flexDirection:"row",
+            alignItems:"center",
+          }}>
+            <View style={{
+              flex: 1,
+              flexDirection:"column",
+              alignItems:"flex-end",
+            }}>
+              <Button
+                title={this.state.marked ? "Unmark" : "Mark"}
+                onPress={ () => this.markEvent() }
+                color="#002554"
+              />
             </View>
-          </Card>
+          </View>
+        :
+          <Text style={ styles.text }>
+            {this.state.startTime}
+          </Text>;
+
+      return(
+          <Ripple>
+            <Card style={ styles.card } onPress={() => {this.expand()}}>
+              <Animated.View
+                style={{ flexDirection:'column',
+                  justifyContent: 'space-between',
+                  height: this.state.height
+              }}>
+                <Text style={ styles.title }> {this.props.title} </Text>
+                {details}
+                <View style={ styles.bottomRow }>
+                  { bottomRight }
+                  { bottomLeft }
+                </View>
+              </Animated.View>
+            </Card>
+          </Ripple>
       );
     }
 }

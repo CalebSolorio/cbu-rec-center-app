@@ -152,8 +152,10 @@ export default class ProfilePage extends Component {
           <Text style={ styles.markedTitle }>Marked</Text>
           <Divider style={ styles.divider }/>
           {this.state.data.map((item) => (
-            <CalendarItem key={item.id} markable={false} title={item.title} startTime={item.start.dateTime} endTime={item.end.dateTime}
-                type={item.type} id={item.id} token={this.props.token}/>
+            <CalendarItem key={item.id} marked={true} title={item.title}
+              startTime={item.start.dateTime} endTime={item.end.dateTime}
+              description={item.description.replace(/\r?\n|\r/g, " ")}
+              type={item.type} id={item.id} token={this.props.token}/>
           ))}
         </View>;
       }

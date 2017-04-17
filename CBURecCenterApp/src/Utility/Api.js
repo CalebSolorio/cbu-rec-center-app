@@ -125,6 +125,19 @@ var Api = {
            .then((res) => res.json());
    },
 
+   unmarkEvent(query, token){
+      var url = 'https://1fgs4l61r4.execute-api.us-east-1.amazonaws.com/Sprint2/marks?eventId='+query
+      return fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                authorizationToken: token,
+              },
+          })
+          .then((res) => res.json());
+  },
+
    getMarks(token){
        var url = 'https://1fgs4l61r4.execute-api.us-east-1.amazonaws.com/Sprint2/marks'
        return fetch(url, {
