@@ -13,24 +13,24 @@ const window = Dimensions.get('window');
 export default class EditProfile extends Component {
 
     constructor(props) {
-            super(props);
-            this.state = {
-                userName: null,
-                password: null,
-                newPassword: null,
-                Name: null,
-                Description: null,
-                tempToken: null,
-              };
-          }
+      super(props);
+      this.state = {
+          userName: null,
+          password: null,
+          newPassword: null,
+          Name: null,
+          Description: null,
+          tempToken: null,
+        };
+    }
 
-          navigate(name){
-              this.props.navigator.push({
-                    name: name,
-                    token: this.props.token,
-                    id: this.props.id
-              })
-          }
+    navigate(name){
+        this.props.navigator.push({
+              name: name,
+              token: this.props.token,
+              id: this.props.id
+        })
+    }
 
     updateUser(){
         Keyboard.dismiss();

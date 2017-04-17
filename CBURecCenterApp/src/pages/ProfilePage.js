@@ -179,10 +179,10 @@ export default class ProfilePage extends Component {
         <Card>
           <View style={ styles.buttonView }>
               <Icon name="settings" size={30}
-                color="#A37400" style={ styles.icon }
+                style={ styles.icon }
                 onPress={() => this.navigate("EditProfile")} />
               <Icon name="exit-to-app" size={30} style={{ alignSelf:"right"}}
-                color="#A37400" style={ styles.icon }
+                style={ styles.icon }
                 onPress={() => this.logout()} />
           </View>
           <Card.Body>
