@@ -20,7 +20,7 @@ export default class LoginPage extends Component {
 
     const quotes = ["'saaaaah dud'", "muscle milk", "protein shakes",
       "yoga pants", "six-packs", "reps", "active wear", "squats",
-      "fist bumps", "pylons constructed", "leg days"];
+      "fist bumps", "leg days"];
 
     this.state = {
         response: null,

@@ -51,6 +51,8 @@ export default class HomePage extends Component {
             bottom: -23, left: null, right: 10
           }} loop>
             <PopularPage navigator={this.props.navigator}
+              token={this.props.token}
+              id={this.props.id}
               onPress={this.onPress}/>
             <InfoPage navigator={this.props.navigator}
               onPress={this.onPress}/>

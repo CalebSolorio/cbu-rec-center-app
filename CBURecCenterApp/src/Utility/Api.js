@@ -10,6 +10,17 @@ var Api = {
             .then((res) => res.json());
     },
 
+    getViral(token){
+        var url = 'https://1fgs4l61r4.execute-api.us-east-1.amazonaws.com/Sprint2/events/viral';
+        return fetch(url, {
+            method: 'GET',
+            headers: {
+                authorizationToken: token
+            },
+        })
+            .then((res) => res.json());
+    },
+
     login(Email, Password){
         var url = 'https://1fgs4l61r4.execute-api.us-east-1.amazonaws.com/Sprint2/login';
         return fetch(url, {
@@ -73,14 +84,14 @@ var Api = {
     },
 
     getUser(query, token){
-        var url = 'https://1fgs4l61r4.execute-api.us-east-1.amazonaws.com/Sprint2/user/?id='+query;
+        var url = 'https://1fgs4l61r4.execute-api.us-east-1.amazonaws.com/Sprint2/user/?id=' + query;
         return fetch(url, {
-                    method: 'GET',
-                    headers: {
-                        authorizationToken: token
-                    },
-                })
-                    .then((res) => res.json());
+            method: 'GET',
+            headers: {
+                authorizationToken: token
+            },
+        })
+            .then((res) => res.json());
     },
 
     updateUser(token, password, name, description){
@@ -148,7 +159,6 @@ var Api = {
        })
            .then((res) => res.json());
    },
-
 
 };
 

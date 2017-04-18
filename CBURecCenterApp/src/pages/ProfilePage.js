@@ -7,7 +7,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import Header from '../Components/Header';
 import Api from '../Utility/Api';
-import CalendarItem from '../Components/CalendarItem'
+import CalendarItem from '../Components/CalendarItem';
 
 export default class ProfilePage extends Component {
   constructor(props){
@@ -17,6 +17,9 @@ export default class ProfilePage extends Component {
         description: null,
         data: null,
     }
+
+    // this.loadUser = this.loadUser().bind(this);
+    // this.loadMarks = this.loadMarks().bind(this);
   }
 
   navigate(name){
@@ -24,18 +27,25 @@ export default class ProfilePage extends Component {
           name: name,
           token: this.props.token,
           id: this.props.id
-      })
+      });
   }
 
   async componentWillMount() {
-    await Api.getUser(this.props.id, this.props.token).then((value) => {
+    await this.loadUser();
+    await this.loadMarks();
+  }
+
+  loadUser = () => {
+    Api.getUser(this.props.id, this.props.token).then((value) => {
       this.setState({
           name: value.name,
           description: value.description
       });
     });
+  }
 
-    await Api.getMarks(this.props.token).then((value) => {
+  loadMarks = () => {
+    Api.getMarks(this.props.token).then((value) => {
         this.setState({ data: value });
     });
   }
@@ -159,7 +169,12 @@ export default class ProfilePage extends Component {
           <Text style={ styles.markedTitle }>Marked</Text>
           <Divider style={ styles.divider }/>
           {this.state.data.map((item) => (
-            <CalendarItem key={item.id} marked={true} title={item.title}
+            <CalendarItem key={item.id}
+              handleMark={() =>{
+                this.loadUser();
+                this.loadMarks();
+              }}
+              marked={true} title={item.title}
               startTime={item.start.dateTime} endTime={item.end.dateTime}
               description={item.description.replace(/\r?\n|\r/g, " ")}
               type={item.type} id={item.id} token={this.props.token}/>
@@ -186,10 +201,8 @@ export default class ProfilePage extends Component {
         <Card>
           <View style={ styles.buttonView }>
               <Icon name="settings" size={30}
-                style={ styles.icon }
                 onPress={() => this.navigate("EditProfile")} />
-              <Icon name="exit-to-app" size={30} style={{ alignSelf:"right"}}
-                style={ styles.icon }
+              <Icon name="exit-to-app" size={30}
                 onPress={() => this.logout()} />
           </View>
           <Card.Body>

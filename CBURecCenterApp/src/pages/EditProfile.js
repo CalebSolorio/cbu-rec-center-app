@@ -90,7 +90,6 @@ export default class EditProfile extends Component {
       return (
         <KeyboardAvoidingView
           style={styles.container}
-          behavior="padding"
         >
           <Text style={styles.text}>Update your profile</Text>
           <MKTextField

@@ -9,14 +9,14 @@ import Api from '../Utility/Api';
 
 const window = Dimensions.get('window');
 
-const COMPACT_HEIGHT = 75;
+const COMPACT_HEIGHT = window.height / 8;
 const EXPANDED_HEIGHT = window.height / 2;
 
 export default class CalendarItem extends Component {
 
     constructor(props) {
         super(props);
-        console.log(props.description.replace(/\r?\n|\r/g, " "));
+        // console.log(props.description.replace(/\r?\n|\r/g, " "));
         this.state = {
           date: null,
           startTime: null,
@@ -35,7 +35,17 @@ export default class CalendarItem extends Component {
               moment(this.props.startTime).format("MMMM Do"),
             startTime: moment(this.props.startTime).format("hh:mm A"),
             endTime: moment(this.props.endTime).format("hh:mm A")
-        })
+        });
+
+        if(this.props.marked == null) {
+          Api.getMarks(this.props.token).then((events) => {
+              for(event in events){
+                if(event.id == this.props.id) {
+                  this.setState({ marked: true });
+                }
+              }
+          });
+        }
     }
 
     expand() {
@@ -59,6 +69,9 @@ export default class CalendarItem extends Component {
                 Api.unmarkEvent(this.props.id, this.props.token).then((value) => {
                     if(value.status === 200){
                         this.setState({ marked: false });
+                        if(this.props.handleMark) {
+                          this.props.handleMark();
+                        }
                     }
                     else{
                       Alert.alert("Error " + value.status + ":", value.message);
@@ -119,8 +132,8 @@ export default class CalendarItem extends Component {
 
       const bottomRight = this.state.expand ?
           <View>
-            <Text style={ styles.text }> {this.state.date} </Text>
-            <Text style={ styles.text }> {this.state.startTime} - {this.state.endTime}</Text>
+            <Text style={ styles.text }>{this.state.date}</Text>
+            <Text style={ styles.text }>{this.state.startTime} - {this.state.endTime}</Text>
           </View>
         :
           <Text style={ styles.text }>
@@ -158,7 +171,7 @@ export default class CalendarItem extends Component {
                   justifyContent: 'space-between',
                   height: this.state.height
               }}>
-                <Text style={ styles.title }> {this.props.title} </Text>
+                <Text style={ styles.title }>{ this.props.title }</Text>
                 {details}
                 <View style={ styles.bottomRow }>
                   { bottomRight }

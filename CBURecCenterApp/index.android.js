@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { BackAndroid, ActivityIndicator, AsyncStorage, AppRegistry, Navigator } from 'react-native';
+import { BackAndroid, ActivityIndicator, AsyncStorage, AppRegistry,
+  Navigator, StyleSheet, View } from 'react-native';
 import HomePage from './src/pages/HomePage';
 import CalendarPage from './src/pages/CalendarPage';
 import DiscoverPage from './src/pages/DiscoverPage';
@@ -89,12 +90,32 @@ export default class CBURecCenterApp extends Component {
     render() {
         //until data is finished loading
         if (this.state.check1 === false || this.state.check2 === false) {
+          const styles = StyleSheet.create({
+            container: {
+              backgroundColor: '#002554',
+              flex: 1,
+            },
+            indicator: {
+                flex: 1,
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: 80,
+            },
+          });
+
           return (
-            <ActivityIndicator
-              animating={true}
-              style={styles.indicator}
-              size="large"
-            />
+            <View
+              style={styles.container}
+              behavior="padding"
+            >
+              <ActivityIndicator
+                animating={true}
+                style={styles.indicator}
+                size="large"
+                color="#A37400"
+              />
+            </View>
           );
         }
           if (this.state.Token === null || this.state.id === null){
