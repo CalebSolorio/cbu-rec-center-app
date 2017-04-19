@@ -17,9 +17,6 @@ export default class ProfilePage extends Component {
         description: null,
         data: null,
     }
-
-    // this.loadUser = this.loadUser().bind(this);
-    // this.loadMarks = this.loadMarks().bind(this);
   }
 
   navigate(name){
@@ -51,12 +48,10 @@ export default class ProfilePage extends Component {
   }
 
   async logout(){
-    // this.navigate("Logout");
     Alert.alert(
       'Are you sure you want to logout?',
       'I thought we had something special...',
       [
-        // {text: 'Ask me later', onPress: () => console.log('Ask me later pressed')},
         { text: 'Cancel' },
         { text: "Yes", onPress: () => {
             AsyncStorage.multiRemove(["token", "id"]).then(() => {
@@ -89,6 +84,7 @@ export default class ProfilePage extends Component {
         text: {
           fontSize: 18,
           paddingBottom: 5,
+          textAlign: 'center',
         },
         input: {
           height: 70,
@@ -124,7 +120,6 @@ export default class ProfilePage extends Component {
           marginVertical: 10,
         },
         markedTitle: {
-          // color: "white",
           fontSize: 15,
           marginTop: 10,
         },
@@ -182,36 +177,33 @@ export default class ProfilePage extends Component {
         </View>;
       }
 
-// For later.
-// <View style={{ flex: 1, flexDirection: "row" }}>
-
       return (
         <ScrollView
-          style={styles.container}
-          behavior="padding"
-        >
-
-        <Card
-          elevation={4}
-          style={ styles.pictureCard }>
-          <Image source={{uri : 'https://s3.amazonaws.com/cbu-rec-center-app/app/images/users/' +
-            this.props.id + '/uncompressed.jpg' }}
-            style={ styles.picture } resizeMode="cover" />
-        </Card>
-        <Card>
-          <View style={ styles.buttonView }>
-              <Icon name="settings" size={30}
-                onPress={() => this.navigate("EditProfile")} />
-              <Icon name="exit-to-app" size={30}
-                onPress={() => this.logout()} />
-          </View>
-          <Card.Body>
-              <Text style={[styles.name, {marginTop: 5 }]}>{ this.state.name }</Text>
-              <Text style={styles.text}>{ this.state.description }</Text>
-              { markedItems }
-          </Card.Body>
-        </Card>
-      </ScrollView>
+            style={styles.container}
+            behavior="padding"
+          >
+          <Card
+            elevation={4}
+            style={ styles.pictureCard }>
+            <Image source={{uri : 'https://s3.amazonaws.com/cbu-rec-center-app/app/images/users/' +
+              this.props.id + '/uncompressed.jpg' }}
+              style={ styles.picture } resizeMode="cover" />
+          </Card>
+          <Card>
+            <View style={ styles.buttonView }>
+                <Icon name="settings" size={30}
+                  onPress={() => this.navigate("EditProfile")} />
+                <Icon name="exit-to-app" size={30}
+                  onPress={() => this.logout()} />
+            </View>
+            <Card.Body>
+                <Text style={[styles.name, {marginTop: 5 }]}>{ this.state.name }</Text>
+                <Text style={styles.text}>{ this.state.description }</Text>
+                { markedItems }
+            </Card.Body>
+          </Card>
+          <Text>{"\n"}</Text>
+        </ScrollView>
     );
   }
 }

@@ -16,42 +16,68 @@ export default class CalendarItem extends Component {
 
     constructor(props) {
         super(props);
-        // console.log(props.description.replace(/\r?\n|\r/g, " "));
+
         this.state = {
           date: null,
           startTime: null,
           endTime: null,
           marked: props.marked,
-          expand: false,
+          child: props.child ? props.child : false,
+          expand: props.expand ? props.expand : false,
           height: new Animated.Value(COMPACT_HEIGHT),
           // opacity: new Animated.Value(0),
         };
     }
 
     componentWillMount(){
-        const startDate = new Date(this.props.startTime);
-        this.setState({
-            date: moment(this.props.startTime).format("dddd") + ", " +
-              moment(this.props.startTime).format("MMMM Do"),
-            startTime: moment(this.props.startTime).format("hh:mm A"),
-            endTime: moment(this.props.endTime).format("hh:mm A")
-        });
+      this.update();
+    }
 
-        if(this.props.marked == null) {
-          Api.getMarks(this.props.token).then((events) => {
-              for(event in events){
-                if(event.id == this.props.id) {
-                  this.setState({ marked: true });
-                }
+    componentWillReceiveProps(nextProps) {
+      if(nextProps != this.props) {
+        this.update(nextProps);
+      }
+    }
+
+    update(newProps) {
+      const props = newProps ? newProps :  this.props;
+      this.setState(props);
+
+      const startDate = new Date(props.startTime);
+      this.setState({
+          date: moment(props.startTime).format("dddd") + ", " +
+            moment(props.startTime).format("MMMM Do"),
+          startTime: moment(props.startTime).format("hh:mm A"),
+          endTime: moment(props.endTime).format("hh:mm A")
+      });
+
+      if(props.marked == null) {
+        Api.getMarks(props.token).then((events) => {
+            for(event in events){
+              if(event.id == props.id) {
+                this.setState({ marked: true });
               }
-          });
-        }
+            }
+        });
+      }
+
+      Animated.timing(this.state.height, {
+        duration: 200,
+        toValue: props.expand ? EXPANDED_HEIGHT : COMPACT_HEIGHT,
+      }).start();
     }
 
     expand() {
-      const expand = !this.state.expand;
-      this.setState({ expand: expand });
+      if(this.state.child) {
+        this.props.handleClick(this.props.id);
+      } else {
+        const expand = !this.state.expand;
+        this.setState({ expand: expand });
+        this.animate(expand);
+      }
+    }
 
+    animate(expand) {
       Animated.timing(this.state.height, {
         duration: 200,
         toValue: expand ? EXPANDED_HEIGHT : COMPACT_HEIGHT,
@@ -85,6 +111,9 @@ export default class CalendarItem extends Component {
         Api.markEvent(this.props.id, this.props.token).then((value) => {
             if(value.status === 200){
               this.setState({ marked:true });
+              if(this.props.handleMark) {
+                this.props.handleMark();
+              }
             }
             else{
                  Alert.alert("Error " + value.status + ":", value.message);
@@ -93,20 +122,13 @@ export default class CalendarItem extends Component {
       }
     }
 
-// For later
-// <Card style={{ flex: .5 }}>
-
     render(){
-      // console.log(this.height);
       const styles = StyleSheet.create({
           card: {
             marginVertical: 4,
             backgroundColor: this.props.type == "class" ?
               "#A37400" : "#AC451E",
-            // height: this.height,
-            // width: this.state.expand ? window.width : 100,
             flex: 1,
-            // flexDirection: 'column',
             justifyContent: 'space-between',
           },
           title: {
@@ -126,7 +148,7 @@ export default class CalendarItem extends Component {
       });
 
       const details = this.state.expand ?
-        <Text style={{color:'white', fontSize: 20 }}>
+        <Text style={{color:'white', fontSize: 18 }}>
           { this.props.description }
         </Text> : null;
 

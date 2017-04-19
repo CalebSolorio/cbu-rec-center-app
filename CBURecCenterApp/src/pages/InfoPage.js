@@ -113,10 +113,10 @@ export default class InfoPage extends Component {
               <Text style={styles.text}>Mon–Fri: 6 a.m.–10 a.m. and 4 p.m.–close </Text>
               <Text style={styles.text}>Sat–Sun: open during hours of operation </Text>
 
-              <Text style={[styles.text, {marginTop:10}]}>Note that the CBU Recreation Center is only available to
-                current students, staff and faculty and their spouses.</Text>
-
               <Divider style={styles.divider}/>
+
+              <Text style={styles.text}>Note that the CBU Recreation Center is only available to
+                current students, staff and faculty and their spouses.</Text>
 
               <Ripple>
                 <Text  style={styles.text}
