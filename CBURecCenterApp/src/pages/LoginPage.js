@@ -10,8 +10,8 @@ import Api from '../Utility/Api';
 import logo from '../Utility/logo.png';
 
 const window = Dimensions.get('window');
-const IMAGE_HEIGHT = window.height / 5 ;
-const IMAGE_HEIGHT_SMALL = window.height / 8;
+const IMAGE_HEIGHT = window.height / 6;
+const IMAGE_HEIGHT_SMALL = window.height / 10;
 
 
 export default class LoginPage extends Component {

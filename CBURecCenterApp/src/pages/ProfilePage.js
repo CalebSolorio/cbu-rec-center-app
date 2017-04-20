@@ -171,7 +171,8 @@ export default class ProfilePage extends Component {
               }}
               marked={true} title={item.title}
               startTime={item.start.dateTime} endTime={item.end.dateTime}
-              description={item.description.replace(/\r?\n|\r/g, " ")}
+              description={item.description ?
+                item.description.replace(/\r?\n|\r/g, " ") : null}
               type={item.type} id={item.id} token={this.props.token}/>
           ))}
         </View>;

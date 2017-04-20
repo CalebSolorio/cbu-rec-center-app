@@ -25,7 +25,6 @@ export default class CalendarItem extends Component {
           child: props.child ? props.child : false,
           expand: props.expand ? props.expand : false,
           height: new Animated.Value(COMPACT_HEIGHT),
-          // opacity: new Animated.Value(0),
         };
     }
 
@@ -136,7 +135,6 @@ export default class CalendarItem extends Component {
               fontSize: 30,
           },
           bottomRow: {
-            // flex: 1,
             flexDirection: 'row',
             justifyContent: 'space-between',
           },

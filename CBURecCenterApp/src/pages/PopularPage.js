@@ -134,7 +134,9 @@ export default class PopularPage extends Component {
                   handleMark={() => this.getMarks()}
                   marked={true} title={event.title}
                   startTime={event.start.dateTime} endTime={event.end.dateTime}
-                  description={event.description} type={event.type} id={event.id}
+                  description={event.description ?
+                    event.description.replace(/\r?\n|\r/g, " ") : null}
+                  type={event.type} id={event.id}
                   child={true} expand={ event.id == this.state.expandId }
                   handleClick={(id) => this.setState({ expandId:
                     (id == this.state.expandId ? null : id) })} />
@@ -145,7 +147,9 @@ export default class PopularPage extends Component {
                 handleMark={() => this.getMarks()}
                 marked={false} title={event.title}
                 startTime={event.start.dateTime} endTime={event.end.dateTime}
-                description={event.description} type={event.type} id={event.id}
+                description={event.description ?
+                  event.description.replace(/\r?\n|\r/g, " ") : null}
+                type={event.type} id={event.id}
                 child={true} expand={ event.id == this.state.expandId }
                 handleClick={(id) => this.setState({ expandId:
                   (id == this.state.expandId ? null : id) })} />
