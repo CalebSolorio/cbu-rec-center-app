@@ -40,14 +40,7 @@ export default class PopularPage extends Component {
       this.setState({name: user.name.split(" ")[0]});
     });
 
-    this.getMarks();
     this.getViral();
-  }
-
-  getMarks = () => {
-    Api.getMarks(this.props.token).then((marks) => {
-      this.setState({marks});
-    });
   }
 
   getViral = () => {
@@ -127,34 +120,39 @@ export default class PopularPage extends Component {
       this.state.events.map((event) => {
         count++;
         if(count < this.state.events.length) {
-          for(mark in this.state.marks) {
-            if(mark.id == event.id) {
-              return(
-                <CalendarItem key={event.id}
-                  handleMark={() => this.getMarks()}
-                  marked={true} title={event.title}
-                  startTime={event.start.dateTime} endTime={event.end.dateTime}
-                  description={event.description ?
-                    event.description.replace(/\r?\n|\r/g, " ") : null}
-                  type={event.type} id={event.id}
-                  child={true} expand={ event.id == this.state.expandId }
-                  handleClick={(id) => this.setState({ expandId:
-                    (id == this.state.expandId ? null : id) })} />
-              );
+          if(this.props.marks.length > 0) {
+            for(mark in this.props.marks) {
+              if(this.props.marks[mark].id == event.id) {
+                return(
+                  <CalendarItem key={event.id}
+                    token={this.props.token}
+                    handleMark={() => this.props.getMarks()}
+                    marked={true} title={event.title}
+                    startTime={event.start.dateTime} endTime={event.end.dateTime}
+                    description={event.description ?
+                      event.description.replace(/\r?\n|\r/g, " ") : null}
+                    type={event.type} id={event.id}
+                    child={true} expand={ event.id == this.state.expandId }
+                    handleClick={(id) => this.setState({ expandId:
+                      (id == this.state.expandId ? null : id) })} />
+                );
+              }
             }
-            return (
-              <CalendarItem key={event.id}
-                handleMark={() => this.getMarks()}
-                marked={false} title={event.title}
-                startTime={event.start.dateTime} endTime={event.end.dateTime}
-                description={event.description ?
-                  event.description.replace(/\r?\n|\r/g, " ") : null}
-                type={event.type} id={event.id}
-                child={true} expand={ event.id == this.state.expandId }
-                handleClick={(id) => this.setState({ expandId:
-                  (id == this.state.expandId ? null : id) })} />
-            );
           }
+
+          return (
+            <CalendarItem key={event.id}
+              token={this.props.token}
+              handleMark={() => this.props.getMarks()}
+              marked={false} title={event.title}
+              startTime={event.start.dateTime} endTime={event.end.dateTime}
+              description={event.description ?
+                event.description.replace(/\r?\n|\r/g, " ") : null}
+              type={event.type} id={event.id}
+              child={true} expand={ event.id == this.state.expandId }
+              handleClick={(id) => this.setState({ expandId:
+                (id == this.state.expandId ? null : id) })} />
+          );
         } else {
           return null;
         }

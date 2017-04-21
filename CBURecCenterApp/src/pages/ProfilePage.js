@@ -29,7 +29,6 @@ export default class ProfilePage extends Component {
 
   async componentWillMount() {
     await this.loadUser();
-    await this.loadMarks();
   }
 
   loadUser = () => {
@@ -38,12 +37,6 @@ export default class ProfilePage extends Component {
           name: value.name,
           description: value.description
       });
-    });
-  }
-
-  loadMarks = () => {
-    Api.getMarks(this.props.token).then((value) => {
-        this.setState({ data: value });
     });
   }
 
@@ -158,17 +151,14 @@ export default class ProfilePage extends Component {
             you're interested in to keep track of them for later!</Text>
         </View>;
 
-      if(this.state.data != null) {
+      if(this.props.marks.length > 0) {
         markedItems =
         <View>
           <Text style={ styles.markedTitle }>Marked</Text>
           <Divider style={ styles.divider }/>
-          {this.state.data.map((item) => (
+          {this.props.marks.map((item) => (
             <CalendarItem key={item.id}
-              handleMark={() =>{
-                this.loadUser();
-                this.loadMarks();
-              }}
+              handleMark={() => this.props.getMarks()}
               marked={true} title={item.title}
               startTime={item.start.dateTime} endTime={item.end.dateTime}
               description={item.description ?

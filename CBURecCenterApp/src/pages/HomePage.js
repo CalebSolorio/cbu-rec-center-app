@@ -17,20 +17,35 @@ const window = Dimensions.get('window');
 export default class HomePage extends Component {
   constructor(props){
    super(props);
+
+   this.state = {
+     marks: null,
+   }
+
    this.onPress = this.onPress.bind(this);
+   this.getMarks = this.getMarks.bind(this);
   }
 
   navigate(name){
       this.props.navigator.push({
           name: name,
           token: this.props.token,
-          id: this.props.id
+          id: this.props.id,
       })
   }
 
+  async componentWillMount() {
+    await this.getMarks();
+  }
+
   onPress = (x) => {
-    console.log("click");
     this.refs.slider.scrollBy(x);
+  }
+
+  getMarks = () => {
+    Api.getMarks(this.props.token).then((marks) => {
+        this.setState({ marks });
+    });
   }
 
   render() {
@@ -53,13 +68,17 @@ export default class HomePage extends Component {
             <PopularPage navigator={this.props.navigator}
               token={this.props.token}
               id={this.props.id}
-              onPress={this.onPress}/>
+              marks={this.state.marks}
+              onPress={this.onPress}
+              getMarks={() => this.getMarks()}/>
             <InfoPage navigator={this.props.navigator}
               onPress={this.onPress}/>
             <ProfilePage navigator={this.props.navigator}
               token={this.props.token}
               id={this.props.id}
-              onPress={this.onPress} />
+              marks={this.state.marks}
+              onPress={this.onPress}
+              getMarks={() => this.getMarks()} />
         </Swiper>
       </View>
     );
