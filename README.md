@@ -3,7 +3,7 @@
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/25271c39509898551879)
 
 #### API Endpoint: https://1fgs4l61r4.execute-api.us-east-1.amazonaws.com/Sprint2
-#### User Image Endpoint: 
+#### User Image Endpoint Format: 
 ```
 https://s3.amazonaws.com/cbu-rec-center-app/app/images/users/<USER ID>/<NAME 1>-<NAME 2>-<uncompressed / 400px / 100px>.jpg
 ```
