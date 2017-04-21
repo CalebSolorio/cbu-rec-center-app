@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { View, ScrollView, Text,  Alert, Animated, Button, Dimensions,
+import { View, ScrollView, Text, ActivityIndicator, Alert, Animated, Button, Dimensions,
   StyleSheet, TouchableHighlight } from 'react-native';
 
 import moment from 'moment';
@@ -25,6 +25,7 @@ export default class CalendarItem extends Component {
           child: props.child ? props.child : false,
           expand: props.expand ? props.expand : false,
           height: new Animated.Value(COMPACT_HEIGHT),
+          loading: false,
         };
     }
 
@@ -39,7 +40,9 @@ export default class CalendarItem extends Component {
     }
 
     update(newProps) {
-      const props = newProps ? newProps :  this.props;
+      const props = newProps ?
+        Object.assign({}, newProps, { loading:false }) :
+        Object.assign({}, this.props, { loading:false });
       this.setState(props);
 
       const startDate = new Date(props.startTime);
@@ -93,9 +96,11 @@ export default class CalendarItem extends Component {
             { text: "Yes", onPress: () => {
                 Api.unmarkEvent(this.props.id, this.props.token).then((value) => {
                     if(value.status === 200){
-                        this.setState({ marked: false });
                         if(this.props.handleMark) {
+                          this.setState({ loading: true });
                           this.props.handleMark();
+                        } else {
+                          this.setState({ marked: false });
                         }
                     }
                     else{
@@ -109,9 +114,11 @@ export default class CalendarItem extends Component {
       } else {
         Api.markEvent(this.props.id, this.props.token).then((value) => {
             if(value.status === 200){
-              this.setState({ marked:true });
               if(this.props.handleMark) {
+                this.setState({ loading: true });
                 this.props.handleMark();
+              } else {
+                this.setState({ marked: true });
               }
             }
             else{
@@ -129,6 +136,10 @@ export default class CalendarItem extends Component {
               "#A37400" : "#AC451E",
             flex: 1,
             justifyContent: 'space-between',
+          },
+          indicator: {
+              flex: 1,
+              height: 80,
           },
           title: {
               color: 'white',
@@ -150,7 +161,7 @@ export default class CalendarItem extends Component {
           { this.props.description }
         </Text> : null;
 
-      const bottomRight = this.state.expand ?
+      const bottomLeft = this.state.expand ?
           <View>
             <Text style={ styles.text }>{this.state.date}</Text>
             <Text style={ styles.text }>{this.state.startTime} - {this.state.endTime}</Text>
@@ -160,12 +171,28 @@ export default class CalendarItem extends Component {
             {this.state.date}
           </Text>;
 
-      const bottomLeft = this.state.expand ?
+      let loadingInticator = this.state.loading ?
+        <ActivityIndicator
+          animating={true}
+          style={styles.indicator}
+          size="large"
+          color="#002554"
+        />
+      : null;
+
+      const bottomRight = this.state.expand ?
           <View style={{
             flex: 1,
             flexDirection:"row",
             alignItems:"center",
           }}>
+            <View style={{
+              flex: 1,
+              flexDirection:"column",
+              alignItems:"flex-end",
+            }}>
+              { loadingInticator }
+            </View>
             <View style={{
               flex: 1,
               flexDirection:"column",
@@ -194,8 +221,8 @@ export default class CalendarItem extends Component {
                 <Text style={ styles.title }>{ this.props.title }</Text>
                 {details}
                 <View style={ styles.bottomRow }>
-                  { bottomRight }
                   { bottomLeft }
+                  { bottomRight }
                 </View>
               </Animated.View>
             </Card>

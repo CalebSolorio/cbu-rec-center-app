@@ -147,11 +147,11 @@ export default class ProfilePage extends Component {
       var markedItems =
         <View>
           <Divider style={ styles.divider } />
-          <Text style={ styles.proTip }>Pro Tip: try marking some events
+          <Text style={ styles.proTip }>Pro Tip: Mark some events
             you're interested in to keep track of them for later!</Text>
         </View>;
 
-      if(this.props.marks.length > 0) {
+      if(this.props.marks && this.props.marks.length > 0) {
         markedItems =
         <View>
           <Text style={ styles.markedTitle }>Marked</Text>

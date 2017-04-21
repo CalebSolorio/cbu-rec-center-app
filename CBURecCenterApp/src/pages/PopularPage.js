@@ -120,7 +120,7 @@ export default class PopularPage extends Component {
       this.state.events.map((event) => {
         count++;
         if(count < this.state.events.length) {
-          if(this.props.marks.length > 0) {
+          if(this.props.marks && this.props.marks.length > 0) {
             for(mark in this.props.marks) {
               if(this.props.marks[mark].id == event.id) {
                 return(
