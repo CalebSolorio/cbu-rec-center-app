@@ -49,22 +49,17 @@ export default class HomePage extends Component {
   }
 
   render() {
-    const styles = {
-      wrapper: {
-      },
-      slide: {
-        flex: 1,
-        justifyContent: 'center',
-        backgroundColor: 'transparent'
-      },
-    }
-
     return(<View>
-        <Swiper ref="slider" style={styles.wrapper} height={window.height}
-          onMomentumScrollEnd={(e, state, context) => console.log('index:', state.index)}
+        <Swiper ref="slider" height={window.height}
           paginationStyle={{
             bottom: -23, left: null, right: 10
-          }} loop>
+          }} index={1} loop>
+            <ProfilePage navigator={this.props.navigator}
+              token={this.props.token}
+              id={this.props.id}
+              marks={this.state.marks}
+              onPress={this.onPress}
+              getMarks={() => this.getMarks()} />
             <PopularPage navigator={this.props.navigator}
               token={this.props.token}
               id={this.props.id}
@@ -73,12 +68,6 @@ export default class HomePage extends Component {
               getMarks={() => this.getMarks()}/>
             <InfoPage navigator={this.props.navigator}
               onPress={this.onPress}/>
-            <ProfilePage navigator={this.props.navigator}
-              token={this.props.token}
-              id={this.props.id}
-              marks={this.state.marks}
-              onPress={this.onPress}
-              getMarks={() => this.getMarks()} />
         </Swiper>
       </View>
     );

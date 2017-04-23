@@ -92,13 +92,13 @@ export default class PopularPage extends Component {
         alignSelf:'center',
       },
       logo: {
-        height: window.width / 8,
+        height: 40,
         resizeMode: 'contain',
-        margin: 15,
+        // marginTop: 5,
         alignSelf:'center',
       },
       icon: {
-        padding: 10,
+        paddingHorizontal: 22,
         alignSelf:'center',
         zIndex: 5,
       },
@@ -169,6 +169,8 @@ export default class PopularPage extends Component {
             <View style={{
               flexDirection: 'row',
               justifyContent:'space-between',
+              marginTop: 10,
+              marginBottom: 5,
             }} onPress={() => console.log("aaayy")}>
 
             <Icon name="account-circle" size={35} color="white"
@@ -188,9 +190,9 @@ export default class PopularPage extends Component {
               width: window.width,
             }}>
               <Text style={{
-                fontSize: 35,
+                fontSize: 30,
                 marginVertical: 5,
-                alignSelf:'center',
+                textAlign:'center',
               }}>Welcome Back, {this.state.name}!</Text>
               <View style={{
                 flex: 1,
@@ -198,7 +200,7 @@ export default class PopularPage extends Component {
                 <Text style={{
                   fontSize: 20,
                   marginBottom: 10,
-                  alignSelf:'center',
+                  textAlign: 'center',
                 }}>Here's what's going on at the Rec Center:</Text>
               </View>
               <Divider style={{

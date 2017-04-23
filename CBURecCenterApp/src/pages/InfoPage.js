@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { View, ScrollView, Text, Image, StyleSheet, TouchableHighlight,
-  Linking, Dimensions } from 'react-native';
+  Linking, Dimensions, Picker } from 'react-native';
 
 import { Card, Divider, Ripple } from 'react-native-material-design';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -11,19 +11,22 @@ import styles from '../Utility/styles';
 const window = Dimensions.get('window');
 
 export default class InfoPage extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state={
+      hours: 0,
+    };
+  }
+
   render() {
     const styles = StyleSheet.create({
       container: {
         backgroundColor: '#002554',
         flex: 1,
       },
-      superTitle: {
-        fontSize: 30,
-        paddingBottom: 5,
-        // textAlign: "center",
-      },
       title: {
-        fontSize: 25,
+        fontSize: 22,
         paddingBottom: 5,
         // textAlign: "center",
       },
@@ -45,7 +48,7 @@ export default class InfoPage extends Component {
         height: window.height / 3,
         resizeMode: 'cover',
       },
-      headerCard: {
+      content: {
         transform: [
           { translateY: -50 },
         ],
@@ -64,6 +67,19 @@ export default class InfoPage extends Component {
       }
     });
 
+    const hours = this.state.hours == 0 ?
+        <View style={{marginHorizontal: 10, marginBottom: 10}}>
+          <Text style={styles.text}>Mon–Thurs: 6 a.m.–12 a.m. </Text>
+          <Text style={styles.text}>Friday: 6 a.m.–10 p.m. </Text>
+          <Text style={styles.text}>Saturday: 10 a.m.–6 p.m. </Text>
+          <Text style={styles.text}>Sunday: 5 p.m.–10 p.m. </Text>
+        </View>
+      :
+        <View style={{marginHorizontal: 10, marginBottom: 10}}>
+          <Text style={styles.text}>Mon–Fri: 6 a.m.–10 a.m. and 4 p.m.–close </Text>
+          <Text style={styles.text}>Sat–Sun: open during hours of operation </Text>
+        </View>;
+
     return (
       <ScrollView
         style={styles.container}
@@ -74,21 +90,23 @@ export default class InfoPage extends Component {
          resizeMode='contain'
          style={styles.image}
         />
-        <View style={styles.headerCard}>
+
+        <View style={styles.content}>
           <Card>
-            <Card.Body>
-              <Text style={styles.superTitle}>About the Rec Center</Text>
-              <Text style={styles.titleText}>The CBU Recreation Center is committed to providing a safe
-                facility and quality recreational programming to encourage and
-                equip the CBU community to honor the Lord with their bodies
-                (1 Corinthians 6:19–20).
-              </Text>
-            </Card.Body>
+          <Picker
+            selectedValue={this.state.hours} mode="dropdown"
+            onValueChange={(hours) => this.setState({hours})}>
+            <Picker.Item label="Rec Center Hours of Operation" value={0} />
+            <Picker.Item label="Climbing Wall Hours of Operation" value={1} />
+          </Picker>
+
+          {hours}
+
           </Card>
           <View style={ styles.buttonView }>
               <Icon name="instagram" size={50}
                 color="white" style={ styles.icon }
-                onPress={() => Linking.openURL('https://www.instagram.com/cbureccenter/')} />
+                onPress={() => Linking.openURL('https://www.instagram.com/_u/cbureccenter/')} />
               <Icon name="facebook-square" size={50} style={{ alignSelf:"right"}}
                 color="white" style={ styles.icon }
                 onPress={() => Linking.openURL('https://www.facebook.com/CBU-Recreation-Center-391198987617096/')} />
@@ -101,27 +119,18 @@ export default class InfoPage extends Component {
           </View>
           <Card>
             <Card.Body>
-              <Text style={styles.title}>Rec Center Hours of Operation</Text>
-              <Text style={styles.text}>Mon–Thurs: 6 a.m.–12 a.m. </Text>
-              <Text style={styles.text}>Friday: 6 a.m.–10 p.m. </Text>
-              <Text style={styles.text}>Saturday: 10 a.m.–6 p.m. </Text>
-              <Text style={styles.text}>Sunday: 5 p.m.–10 p.m. </Text>
-
+              <Text style={styles.title}>About the Rec Center</Text>
+              <Text style={styles.titleText}>The CBU Recreation Center is committed to providing a safe
+                facility and quality recreational programming to encourage and
+                equip the CBU community to honor the Lord with their bodies
+                (1 Corinthians 6:19–20).
+              </Text>
               <Divider style={styles.divider}/>
-
-              <Text style={styles.title}>Climbing Wall Hours of Operation</Text>
-              <Text style={styles.text}>Mon–Fri: 6 a.m.–10 a.m. and 4 p.m.–close </Text>
-              <Text style={styles.text}>Sat–Sun: open during hours of operation </Text>
-
-              <Divider style={styles.divider}/>
-
-              <Text style={styles.text}>Note that the CBU Recreation Center is only available to
-                current students, staff and faculty and their spouses.</Text>
 
               <Ripple>
                 <Text  style={styles.text}
                     onPress={() => Linking.openURL('https://calbaptist.edu/community-life/campus-recreation/recreation-center/')}>
-                  For more information, press here.</Text>
+                  To visit the Rec Center's website, press here.</Text>
               </Ripple>
             </Card.Body>
           </Card>

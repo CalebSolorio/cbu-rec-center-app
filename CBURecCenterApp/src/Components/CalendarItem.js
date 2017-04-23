@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { View, ScrollView, Text, ActivityIndicator, Alert, Animated, Button, Dimensions,
-  StyleSheet, TouchableHighlight } from 'react-native';
+  StyleSheet, TouchableHighlight, Image } from 'react-native';
 
 import moment from 'moment';
 import { Card, Ripple } from 'react-native-material-design';
@@ -9,7 +9,7 @@ import Api from '../Utility/Api';
 
 const window = Dimensions.get('window');
 
-const COMPACT_HEIGHT = window.height / 8;
+const COMPACT_HEIGHT = window.height / 10;
 const EXPANDED_HEIGHT = window.height / 2;
 
 export default class CalendarItem extends Component {
@@ -26,6 +26,9 @@ export default class CalendarItem extends Component {
           expand: props.expand ? props.expand : false,
           height: new Animated.Value(COMPACT_HEIGHT),
           loading: false,
+          color: this.props.type == "class" ?
+            'rgba(163, 116, 0, 1)' : 'rgba(172, 69, 30, 1)',
+          rgba: new Animated.Value(0),
         };
     }
 
@@ -45,12 +48,11 @@ export default class CalendarItem extends Component {
         Object.assign({}, this.props, { loading:false });
       this.setState(props);
 
-      const startDate = new Date(props.startTime);
       this.setState({
           date: moment(props.startTime).format("dddd") + ", " +
             moment(props.startTime).format("MMMM Do"),
-          startTime: moment(props.startTime).format("hh:mm A"),
-          endTime: moment(props.endTime).format("hh:mm A")
+          startTime: moment(props.startTime).format("h:mm A"),
+          endTime: moment(props.endTime).format("h:mm A")
       });
 
       if(props.marked == null) {
@@ -63,10 +65,7 @@ export default class CalendarItem extends Component {
         });
       }
 
-      Animated.timing(this.state.height, {
-        duration: 200,
-        toValue: props.expand ? EXPANDED_HEIGHT : COMPACT_HEIGHT,
-      }).start();
+      this.animate(props.expand);
     }
 
     expand() {
@@ -74,16 +73,28 @@ export default class CalendarItem extends Component {
         this.props.handleClick(this.props.id);
       } else {
         const expand = !this.state.expand;
-        this.setState({ expand: expand });
+        this.setState({ expand });
         this.animate(expand);
       }
     }
 
     animate(expand) {
+      console.log("animate", expand);
+
+      console.log(expand ? this.state.color[0] : 255);
+      console.log(expand ? this.state.color[1] : 255);
+      console.log(expand ? this.state.color[2] : 255);
+
       Animated.timing(this.state.height, {
         duration: 200,
         toValue: expand ? EXPANDED_HEIGHT : COMPACT_HEIGHT,
       }).start();
+
+      Animated.timing(this.state.rgba, {
+        toValue: expand ? 1 : 0,
+          duration: 200,
+        }
+      ).start();
     }
 
     markEvent(){
@@ -129,11 +140,15 @@ export default class CalendarItem extends Component {
     }
 
     render(){
+      var color = this.state.rgba.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['rgba(255, 255, 255, 1)', this.state.color]
+      });
+
       const styles = StyleSheet.create({
           card: {
-            marginVertical: 4,
-            backgroundColor: this.props.type == "class" ?
-              "#A37400" : "#AC451E",
+            marginHorizontal:0,
+            marginVertical: 5,
             flex: 1,
             justifyContent: 'space-between',
           },
@@ -142,7 +157,6 @@ export default class CalendarItem extends Component {
               height: 80,
           },
           title: {
-              color: 'white',
               fontSize: 30,
           },
           bottomRow: {
@@ -150,28 +164,33 @@ export default class CalendarItem extends Component {
             justifyContent: 'space-between',
           },
           text: {
-              color: 'white',
-              fontSize: 18,
-              marginBottom: 5,
+            fontSize: 18,
+            marginBottom: 5,
           },
       });
 
+      const title = this.state.expand ?
+        <Text style={[styles.title, {color: 'white'}]}>{ this.props.title }</Text> :
+        <Text style={ styles.title }>{ this.props.title }</Text>;
+
       const details = this.state.expand ?
-        <Text style={{color:'white', fontSize: 18 }}>
-          { this.props.description }
-        </Text> : null;
+        <View>
+          <Text style={{color:'white', fontSize: 18 }}>
+            { this.props.description }
+          </Text>
+        </View> : null;
 
       const bottomLeft = this.state.expand ?
           <View>
-            <Text style={ styles.text }>{this.state.date}</Text>
-            <Text style={ styles.text }>{this.state.startTime} - {this.state.endTime}</Text>
+            <Text style={[styles.text, {color: 'white'}]}>{this.state.date}</Text>
+            <Text style={[styles.text, {color: 'white'}]}>{this.state.startTime} - {this.state.endTime}</Text>
           </View>
         :
           <Text style={ styles.text }>
             {this.state.date}
           </Text>;
 
-      let loadingInticator = this.state.loading ?
+      const loadingInticator = this.state.loading ?
         <ActivityIndicator
           animating={true}
           style={styles.indicator}
@@ -199,6 +218,7 @@ export default class CalendarItem extends Component {
               alignItems:"flex-end",
             }}>
               <Button
+                style={{width: 150}}
                 title={this.state.marked ? "Unmark" : "Mark"}
                 onPress={ () => this.markEvent() }
                 color="#002554"
@@ -212,14 +232,35 @@ export default class CalendarItem extends Component {
 
       return(
           <Ripple>
-            <Card style={ styles.card } onPress={() => {this.expand()}}>
+            <Card style={ styles.card } elevation={ this.state.expand ? 4 : 0 }
+                onPress={() => {this.expand()}}>
+              <Animated.View style={{
+                position:'absolute',
+                top: 0,
+                left: 0,
+                height: window.height /2,
+                width: window.width,
+                backgroundColor: color,
+              }}>
+              </Animated.View>
+              <Animated.View style={{
+                position:'absolute',
+                top: 0,
+                left: 0,
+                backgroundColor: this.state.color,
+                height: this.state.height,
+                width: 7
+              }}>
+              </Animated.View>
+
               <Animated.View
-                style={{ flexDirection:'column',
+                style={{
+                  flexDirection:'column',
                   justifyContent: 'space-between',
                   height: this.state.height
               }}>
-                <Text style={ styles.title }>{ this.props.title }</Text>
-                {details}
+                { title }
+                { details }
                 <View style={ styles.bottomRow }>
                   { bottomLeft }
                   { bottomRight }

@@ -94,7 +94,7 @@ export default class ProfilePage extends Component {
           marginVertical: 4,
           borderRadius: 80,
         },
-        pictureCard: {
+        circleCard: {
           alignSelf: 'center',
           height: 160,
           width: 160,
@@ -153,19 +153,19 @@ export default class ProfilePage extends Component {
 
       if(this.props.marks && this.props.marks.length > 0) {
         markedItems =
-        <View>
-          <Text style={ styles.markedTitle }>Marked</Text>
-          <Divider style={ styles.divider }/>
-          {this.props.marks.map((item) => (
-            <CalendarItem key={item.id}
-              handleMark={() => this.props.getMarks()}
-              marked={true} title={item.title}
-              startTime={item.start.dateTime} endTime={item.end.dateTime}
-              description={item.description ?
-                item.description.replace(/\r?\n|\r/g, " ") : null}
-              type={item.type} id={item.id} token={this.props.token}/>
-          ))}
-        </View>;
+          <View>
+            <Text style={ styles.markedTitle }>Marked</Text>
+            <Divider style={ styles.divider }/>
+            {this.props.marks.map((item) => (
+              <CalendarItem key={item.id}
+                handleMark={() => this.props.getMarks()}
+                marked={true} title={item.title}
+                startTime={item.start.dateTime} endTime={item.end.dateTime}
+                description={item.description ?
+                  item.description.replace(/\r?\n|\r/g, " ") : null}
+                type={item.type} id={item.id} token={this.props.token}/>
+            ))}
+          </View>;
       }
 
       return (
@@ -175,7 +175,7 @@ export default class ProfilePage extends Component {
           >
           <Card
             elevation={4}
-            style={ styles.pictureCard }>
+            style={ styles.circleCard }>
             <Image source={{uri : 'https://s3.amazonaws.com/cbu-rec-center-app/app/images/users/' +
               this.props.id + '/uncompressed.jpg' }}
               style={ styles.picture } resizeMode="cover" />
