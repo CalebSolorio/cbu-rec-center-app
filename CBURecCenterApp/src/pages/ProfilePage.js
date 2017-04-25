@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { ScrollView, View, Text, Image, Picker, StyleSheet, ActivityIndicator,
+import { Dimensions, ScrollView, View, Text, Image, Picker, StyleSheet, ActivityIndicator,
     AsyncStorage, TouchableHighlight, Button, Alert, StatusBar } from 'react-native';
 
 import { Card, Divider } from 'react-native-material-design';
@@ -7,6 +7,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import Api from '../Utility/Api';
 import CalendarItem from '../Components/CalendarItem';
+
+const window = Dimensions.get('window');
 
 /*
   Presents info on the user.
@@ -197,32 +199,50 @@ export default class ProfilePage extends Component {
       }
 
       return (
-        <ScrollView
-            style={styles.container}
-            behavior="padding"
-          >
-          <Card
-            elevation={4}
-            style={ styles.circleCard }>
-            <Image source={{uri : 'https://s3.amazonaws.com/cbu-rec-center-app/app/images/users/' +
-              this.props.id + '/uncompressed.jpg' }}
-              style={ styles.picture } resizeMode="cover" />
-          </Card>
-          <Card>
-            <View style={ styles.buttonView }>
-                <Icon name="settings" size={30}
-                  onPress={() => this.navigate("EditProfile")} />
-                <Icon name="exit-to-app" size={30}
-                  onPress={() => this.logout()} />
-            </View>
-            <Card.Body>
-                <Text style={[styles.name, {marginTop: 5 }]}>{ this.state.name }</Text>
-                <Text style={styles.text}>{ this.state.description }</Text>
-                { markedItems }
-            </Card.Body>
-          </Card>
-          <Text>{"\n"}</Text>
-        </ScrollView>
+        <View
+          style={styles.container}
+        >
+          <View style={{ flex: 1, alignItems: 'stretch' }}>
+            <Image source={{
+              uri: 'https://calbaptist.edu/_resources/images/cbu-recreation-center-entrance-dusk-original-5000px.jpg'
+            }} style={{
+              height: window.height,
+              width: window.width,
+              position: 'absolute',
+              top:0,
+              left:0,
+            }}/>
+          </View>
+
+          <ScrollView behavior="padding"
+            style={{
+              position:'absolute',
+              flex: 1,
+              height: window.height,
+            }}>
+            <Card
+              elevation={4}
+              style={ styles.circleCard }>
+              <Image source={{uri : 'https://s3.amazonaws.com/cbu-rec-center-app/app/images/users/' +
+                this.props.id + '/uncompressed.jpg' }}
+                style={ styles.picture } resizeMode="cover" />
+            </Card>
+            <Card>
+              <View style={ styles.buttonView }>
+                  <Icon name="settings" size={30}
+                    onPress={() => this.navigate("EditProfile")} />
+                  <Icon name="exit-to-app" size={30}
+                    onPress={() => this.logout()} />
+              </View>
+              <Card.Body>
+                  <Text style={[styles.name, {marginTop: 5 }]}>{ this.state.name }</Text>
+                  <Text style={styles.text}>{ this.state.description }</Text>
+                  { markedItems }
+              </Card.Body>
+            </Card>
+            <Text>{"\n"}</Text>
+          </ScrollView>
+        </View>
     );
   }
 }
