@@ -1,15 +1,20 @@
 import React, { Component, PropTypes } from 'react';
 import { ScrollView, View, Text, Image, Picker, StyleSheet, ActivityIndicator,
-    AsyncStorage, TouchableHighlight, Button, Alert } from 'react-native';
+    AsyncStorage, TouchableHighlight, Button, Alert, StatusBar } from 'react-native';
 
 import { Card, Divider } from 'react-native-material-design';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import Header from '../Components/Header';
 import Api from '../Utility/Api';
 import CalendarItem from '../Components/CalendarItem';
 
+/*
+  Presents info on the user.
+*/
 export default class ProfilePage extends Component {
+  /**
+   * Initializes the component.
+  */
   constructor(props){
     super(props);
     this.state = {
@@ -17,20 +22,37 @@ export default class ProfilePage extends Component {
         description: null,
         data: null,
     }
+
+    this.loadUser = this.loadUser.bind(this);
   }
 
+  /**
+   * Navigates to the sepcified page.
+   *
+   * @param {Object} name The keyword of the desired page.
+  */
   navigate(name){
       this.props.navigator.push({
           name: name,
           token: this.props.token,
-          id: this.props.id
+          id: this.props.id,
+          callback: () => {
+            this.loadUser();
+            this.props.addEventListeners();
+          },
       });
   }
 
+  /*
+    Loads the user's info upon mounting.
+  */
   async componentWillMount() {
     await this.loadUser();
   }
 
+  /*
+    Gathers the most up-to-date user info.
+  */
   loadUser = () => {
     Api.getUser(this.props.id, this.props.token).then((value) => {
       this.setState({
@@ -40,6 +62,9 @@ export default class ProfilePage extends Component {
     });
   }
 
+  /*
+    Assists with logging the user out.
+  */
   async logout(){
     Alert.alert(
       'Are you sure you want to logout?',
@@ -48,7 +73,7 @@ export default class ProfilePage extends Component {
         { text: 'Cancel' },
         { text: "Yes", onPress: () => {
             AsyncStorage.multiRemove(["token", "id"]).then(() => {
-              this.navigate("Login");
+              this.props.navigator.resetTo({ name: "Login" });
             });
           }
         },
@@ -56,6 +81,9 @@ export default class ProfilePage extends Component {
     )
   }
 
+  /*
+    Renders the component.
+  */
   render() {
       const styles = StyleSheet.create({
         container: {

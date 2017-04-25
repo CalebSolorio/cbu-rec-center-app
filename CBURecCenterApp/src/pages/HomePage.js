@@ -1,11 +1,24 @@
-import React, { Component, PropTypes } from 'react';
-import { View, Keyboard, AsyncStorage, Text, Alert,
-  TextInput, StyleSheet, ScrollView, Button,
-  Dimensions, Animated, Image } from 'react-native';
+import React, {Component, PropTypes} from 'react';
+import {
+  Alert,
+  Animated,
+  AsyncStorage,
+  BackAndroid,
+  Button,
+  Dimensions,
+  Image,
+  Keyboard,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  View
+} from 'react-native';
 
 import Swiper from 'react-native-swiper';
 
-import PopularPage from '../pages/PopularPage';
+import DiscoveryPage from '../pages/DiscoveryPage';
 import InfoPage from '../pages/InfoPage';
 import ProfilePage from '../pages/ProfilePage';
 
@@ -14,60 +27,93 @@ import logo from '../Utility/logo.png';
 
 const window = Dimensions.get('window');
 
+/*
+  Controls the 3 main view of the app.
+*/
 export default class HomePage extends Component {
-  constructor(props){
-   super(props);
+  /**
+   * Initializes the component.
+  */
+  constructor(props) {
+    super(props);
 
-   this.state = {
-     marks: null,
-   }
+    this.state = {
+      index: 1,
+      scrollBy: 0,
+      marks: null
+    }
 
-   this.onPress = this.onPress.bind(this);
-   this.getMarks = this.getMarks.bind(this);
+    this.onBack = this.onBack.bind(this);
+    this.getMarks = this.getMarks.bind(this);
+    this.addEventListeners = this.addEventListeners.bind(this);
   }
 
-  navigate(name){
-      this.props.navigator.push({
-          name: name,
-          token: this.props.token,
-          id: this.props.id,
-      })
+  /**
+   * Navigates to a new page.
+   *
+   * @param {Object} name The keyword of the desired page.
+  */
+  navigate(name) {
+    this.props.navigator.push({name: name, token: this.props.token, id: this.props.id})
   }
 
+  /**
+   * Gets the users marked events and adds listeners for the
+   * Android back button on mounting.
+  */
   async componentWillMount() {
     await this.getMarks();
+    this.addEventListeners();
   }
 
-  onPress = (x) => {
-    this.refs.slider.scrollBy(x);
+  /**
+   * Adds an listener for the Android back button.
+  */
+  addEventListeners = () => {
+    BackAndroid.addEventListener('hardwareBackPress', () => this.onBack());
   }
 
+  /**
+   * Initializes the component.
+  */
+  onBack = () => {
+    if (this.state.index == 1) {
+      return false;
+    } else {
+      this.refs.slider.scrollBy(this.state.scrollBy);
+      return true;
+    }
+  }
+
+  /**
+   * get's the user's marked events.
+  */
   getMarks = () => {
     Api.getMarks(this.props.token).then((marks) => {
-        this.setState({ marks });
+      this.setState({marks});
     });
   }
 
+  /**
+   * Renders the component.
+  */
   render() {
-    return(<View>
-        <Swiper ref="slider" height={window.height}
-          paginationStyle={{
-            bottom: -23, left: null, right: 10
-          }} index={1} loop>
-            <ProfilePage navigator={this.props.navigator}
-              token={this.props.token}
-              id={this.props.id}
-              marks={this.state.marks}
-              onPress={this.onPress}
-              getMarks={() => this.getMarks()} />
-            <PopularPage navigator={this.props.navigator}
-              token={this.props.token}
-              id={this.props.id}
-              marks={this.state.marks}
-              onPress={this.onPress}
-              getMarks={() => this.getMarks()}/>
-            <InfoPage navigator={this.props.navigator}
-              onPress={this.onPress}/>
+    return (
+      <View>
+        <StatusBar backgroundColor="#001e44" barStyle="light-content"/>
+        <Swiper ref="slider" height={window.height} onMomentumScrollEnd={(e, state, context) => {
+          this.setState({
+            index: state.index,
+            scrollBy: this.state.index - state.index
+          });
+        }} paginationStyle={{
+          bottom: -23,
+          left: null,
+          right: 10
+        }} index={this.state.index} loop>
+          <ProfilePage navigator={this.props.navigator} token={this.props.token} id={this.props.id} marks={this.state.marks} onPress={(x) => this.refs.slider.scrollBy(x)} getMarks={() => this.getMarks()} addEventListeners={() => this.addEventListeners()}/>
+          <DiscoveryPage navigator={this.props.navigator} token={this.props.token} id={this.props.id} marks={this.state.marks} onPress={(x) => this.refs.slider.scrollBy(x)} getMarks={() => this.getMarks()}/>
+          <InfoPage navigator={this.props.navigator} onPress={(x) => this.refs.slider.scrollBy(x)}/>
         </Swiper>
       </View>
     );
