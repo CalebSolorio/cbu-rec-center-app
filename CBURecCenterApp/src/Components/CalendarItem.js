@@ -17,7 +17,7 @@ import {
 import moment from 'moment';
 import {Card, Ripple} from 'react-native-material-design';
 
-import Api from '../Utility/Api';
+import Api from '../utility/Api';
 
 const window = Dimensions.get('window');
 

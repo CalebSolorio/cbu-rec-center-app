@@ -22,8 +22,8 @@ import DiscoveryPage from '../pages/DiscoveryPage';
 import InfoPage from '../pages/InfoPage';
 import ProfilePage from '../pages/ProfilePage';
 
-import Api from '../Utility/Api';
-import logo from '../Utility/logo.png';
+import Api from '../utility/Api';
+import logo from '../utility/logo.png';
 
 const window = Dimensions.get('window');
 

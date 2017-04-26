@@ -19,8 +19,8 @@ import {
 import {MKTextField} from 'react-native-material-kit';
 import async from 'async';
 
-import Api from '../Utility/Api';
-import logo from '../Utility/logo.png';
+import Api from '../utility/Api';
+import logo from '../utility/logo.png';
 
 const window = Dimensions.get('window');
 const IMAGE_HEIGHT = window.height / 6;

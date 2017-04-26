@@ -17,7 +17,7 @@ import {
 import {MKTextField} from 'react-native-material-kit';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import Api from '../Utility/Api';
+import Api from '../utility/Api';
 
 const window = Dimensions.get('window');
 

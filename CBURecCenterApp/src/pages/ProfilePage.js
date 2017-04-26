@@ -5,8 +5,8 @@ import { Dimensions, ScrollView, View, Text, Image, Picker, StyleSheet, Activity
 import { Card, Divider } from 'react-native-material-design';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import Api from '../Utility/Api';
-import CalendarItem from '../Components/CalendarItem';
+import Api from '../utility/Api';
+import CalendarItem from '../components/CalendarItem';
 
 const window = Dimensions.get('window');
 

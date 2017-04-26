@@ -125,7 +125,9 @@ module.exports = {
                 });
             },
             function(events, scores, wNext) {
-                var currentTime = new Date().getTime();
+                // STATIC DATE FOR DEMO.
+                var currentTime = new Date('2017-04-25').getTime();
+                // var currentTime = new Date().getTime();
                 var data = [];
 
                 for (var i = 0; i < events.length; i++) {

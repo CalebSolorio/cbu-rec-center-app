@@ -23,10 +23,10 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {MKTextField} from 'react-native-material-kit';
 import moment from 'moment';
 
-import CalendarItem from '../Components/CalendarItem';
+import CalendarItem from '../components/CalendarItem';
 
-import Api from '../Utility/Api';
-import logo from '../Utility/logo.png';
+import Api from '../utility/Api';
+import logo from '../utility/logo.png';
 
 const window = Dimensions.get('window');
 
@@ -131,8 +131,6 @@ export default class DiscoveryPage extends Component {
     if (!this.state.gatheringData) {
       this.setState({gatheringData: true, events: null});
       Api.getDate(moment(date).format("M-D-YYYY"), this.props.token).then((events) => {
-        console.log("EVENTS", events)
-
         this.setState({gatheringData: false});
         if (!events.status) {
           let items = [];
@@ -142,8 +140,7 @@ export default class DiscoveryPage extends Component {
 
           this.setState({events: items, hours: events.hours});
         } else {
-          this.setState({date: null});
-          Alert.alert("We're closed ¯\\_(ツ)_/¯", "Nothing's happening on that day.");
+          this.setState({ events:[] });
         }
       });
     }
@@ -196,7 +193,7 @@ export default class DiscoveryPage extends Component {
           marginVertical: 10
         }}>
           <Text style={{
-            fontSize: 25
+            fontSize: 20
           }}>
             {moment(this.state.date).format("dddd") + ", " + moment(this.state.date).format("MMMM Do")}:
           </Text>
