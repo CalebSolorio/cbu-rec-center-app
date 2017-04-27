@@ -26,7 +26,7 @@ import moment from 'moment';
 import CalendarItem from '../components/CalendarItem';
 
 import Api from '../utility/Api';
-import logo from '../utility/logo.png';
+import logo from '../utility/LogoWhite.png';
 
 const window = Dimensions.get('window');
 
@@ -88,7 +88,8 @@ export default class DiscoveryPage extends Component {
         ? this.state.events.length
         : 0, this.props.token).then((events) => {
         this.setState({gatheringData: false});
-        if (events.status == 200 && this.state.events) {
+        if (events.status == 200 && this.state.events &&
+            this.state.events.length > 0) {
           this.setState({
             events: this.state.events.concat(events.data.items)
           });
@@ -268,7 +269,7 @@ export default class DiscoveryPage extends Component {
             marginVertical: 10
           }}>
             <View style={{
-              flex: .5,
+              flex: .2,
               flexDirection: 'row',
               justifyContent: 'center'
             }}>
@@ -281,7 +282,7 @@ export default class DiscoveryPage extends Component {
               justifyContent: 'flex-end'
             }}>
               <Icon name="account-circle" size={35} color="white" style={styles.icon} onPress={() => this.props.onPress(-1)}/>
-              <Icon name="event-note" size={35} color="white" style={styles.icon} onPress={() => this.showPicker({date: new Date(), minDate: new Date(), mode: 'spinner'})}/>
+              <Icon name="event-note" size={35} color="white" style={styles.icon} onPress={() => this.showPicker({date: new Date("2017-04-26"), minDate: new Date("2017-04-26"), mode: 'spinner'})}/>
               <Icon name="info-outline" size={35} color="white" style={styles.icon} onPress={() => this.props.onPress(1)}/>
             </View>
 

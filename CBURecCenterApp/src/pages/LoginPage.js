@@ -20,11 +20,11 @@ import {MKTextField} from 'react-native-material-kit';
 import async from 'async';
 
 import Api from '../utility/Api';
-import logo from '../utility/logo.png';
+import logo from '../utility/LogoWhite.png';
 
 const window = Dimensions.get('window');
-const IMAGE_HEIGHT = window.height / 6;
-const IMAGE_HEIGHT_SMALL = window.height / 10;
+const IMAGE_HEIGHT = window.height / 3;
+const IMAGE_HEIGHT_SMALL = window.height / 6;
 
 /*
   Assists with logging the user in.
@@ -152,7 +152,7 @@ export default class LoginPage extends Component {
       },
       text: {
         color: "white",
-        fontSize: 24,
+        fontSize: 20,
         width: window.width - 30,
         paddingBottom: 5,
         textAlign: "center"

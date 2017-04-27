@@ -187,13 +187,14 @@ export default class ProfilePage extends Component {
             <Text style={ styles.markedTitle }>Marked</Text>
             <Divider style={ styles.divider }/>
             {this.props.marks.map((item) => (
-              <CalendarItem key={item.id}
+              <CalendarItem key={item.details.id}
                 handleMark={() => this.props.getMarks()}
-                marked={true} title={item.title}
-                startTime={item.start.dateTime} endTime={item.end.dateTime}
-                description={item.description ?
-                  item.description.replace(/\r?\n|\r/g, " ") : null}
-                type={item.type} id={item.id} token={this.props.token}/>
+                marked={true} title={item.details.title}
+                startTime={item.details.start.dateTime}
+                endTime={item.details.end.dateTime}
+                description={item.details.description ?
+                  item.details.description.replace(/\r?\n|\r/g, " ") : null}
+                type={item.details.type} id={item.details.id} token={this.props.token}/>
             ))}
           </View>;
       }

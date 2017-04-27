@@ -1,0 +1,26 @@
+<resources>
+  <!-- inherit from the material theme -->
+  <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+  <!--<style name="AppTheme" parent="android:Theme.Material.NoActionBar">-->
+    <!-- Main theme colors -->
+
+    <!--   your app branding color for the app bar -->
+    <item name="android:colorPrimary">@color/dark_red</item>
+
+    <!--   darker variant for the status bar and contextual app bars -->
+    <item name="android:colorPrimaryDark">@color/main_red</item>
+
+    <!-- Active thumb color & Active track color(30% transparency) -->
+    <item name="colorControlActivated">@color/main_red</item>
+
+    <item name="android:datePickerDialogTheme">@style/MyDatePickerDialogTheme</item>
+    <item name="android:timePickerDialogTheme">@style/MyDatePickerDialogTheme</item>
+  </style>
+
+  <style name="MyDatePickerDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+     <item name="colorPrimary">@color/main_red</item>
+     <item name="colorPrimaryDark">@color/main_red</item>
+     <item name="colorAccent">@color/main_red</item>
+     <item name="android:headerBackground">@color/main_red</item>
+  </style>
+</resources>

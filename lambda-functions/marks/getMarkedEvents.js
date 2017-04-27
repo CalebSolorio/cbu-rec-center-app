@@ -68,8 +68,10 @@ function getEvents(userId, callback) {
             };
             callback(errResponse);
         } else {
+          console.log("count", data.Count);
             if(data.Count > 0) {
                 items = [];
+                var currentCount = 0;
                 data.Items.forEach(function(element, index, arr) {
                     params = {
                         TableName: "rec_center_events",
@@ -89,19 +91,20 @@ function getEvents(userId, callback) {
                             var params = {
                                 TableName : "rec_center_marks",
                                 ProjectionExpression:"user_id",
-                                KeyConditionExpression: "event_id = :id",
+                                FilterExpression: "event_id = :id",
                                 ExpressionAttributeValues: {
                                     ":id": element.event_id
                                 }
                             };
 
-                            docClient.query(params, function(err, markData) {
+                            docClient.scan(params, function(err, markData) {
                                 if (err) {
                                     var response = {
                                         status: 500,
                                         message: "Unable to get query marks :("
                                     };
-                                    next(response);
+                                    console.log("y tho", err);
+                                    callback(response);
                                 } else {
                                     var item = {
                                         details: eventData.Item,
@@ -110,8 +113,10 @@ function getEvents(userId, callback) {
 
                                     items.push(item);
 
-                                    if(index + 1 == data.Count) {
+                                    if(currentCount + 1 == data.Count) {
                                         callback(null, items);
+                                    } else {
+                                      currentCount++;
                                     }
                                 }
                             });

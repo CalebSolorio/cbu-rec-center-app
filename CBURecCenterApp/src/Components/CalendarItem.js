@@ -158,10 +158,10 @@ export default class CalendarItem extends Component {
         }, {
           text: "Yes",
           onPress: () => {
+            this.setState({loading: true});
             Api.unmarkEvent(this.props.id, this.props.token).then((value) => {
               if (value.status === 200) {
                 if (this.props.handleMark) {
-                  this.setState({loading: true});
                   this.props.handleMark();
                 } else {
                   this.setState({marked: false});
@@ -174,10 +174,10 @@ export default class CalendarItem extends Component {
         }
       ],);
     } else {
+      this.setState({loading: true});
       Api.markEvent(this.props.id, this.props.token).then((value) => {
         if (value.status === 200) {
           if (this.props.handleMark) {
-            this.setState({loading: true});
             this.props.handleMark();
           } else {
             this.setState({marked: true});

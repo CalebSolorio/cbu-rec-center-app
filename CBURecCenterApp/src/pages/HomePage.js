@@ -89,6 +89,7 @@ export default class HomePage extends Component {
    * get's the user's marked events.
   */
   getMarks = () => {
+    console.log("hey there");
     Api.getMarks(this.props.token).then((marks) => {
       this.setState({marks});
     });
