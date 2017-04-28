@@ -237,7 +237,7 @@ export default class DiscoveryPage extends Component {
       items = this.state.events.map((event) => {
         if (this.props.marks && this.props.marks.length > 0) {
           for (mark in this.props.marks) {
-            if (this.props.marks[mark].id == event.id) {
+            if (this.props.marks[mark].details.id == event.id) {
               return (<CalendarItem key={event.id} token={this.props.token} handleMark={() => this.props.getMarks()} marked={true} title={event.title} startTime={event.start.dateTime} endTime={event.end.dateTime} description={event.description
                 ? event.description.replace(/\r?\n|\r/g, " ")
                 : null} type={event.type} id={event.id} child={true} expand={event.id == this.state.expandId} handleClick={(id) => this.setState({

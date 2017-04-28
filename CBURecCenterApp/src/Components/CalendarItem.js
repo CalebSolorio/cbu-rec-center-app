@@ -83,6 +83,7 @@ export default class CalendarItem extends Component {
    * @param {Object} newProps The new props to update with.
   */
   update(newProps) {
+    console.log("yooo", JSON.stringify(newProps));
     const props = newProps
       ? Object.assign({}, newProps, {loading: false})
       : Object.assign({}, this.props, {loading: false});
