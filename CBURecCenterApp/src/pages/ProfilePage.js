@@ -220,6 +220,7 @@ export default class ProfilePage extends Component {
               position:'absolute',
               flex: 1,
               height: window.height,
+              width: window.width,
             }}>
             <Card
               elevation={4}
