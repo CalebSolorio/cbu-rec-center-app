@@ -1,4 +1,4 @@
-# CBU REC Center App
+# CBU REC Center App (CURRENTLY UNACTIVE, SEE DEMO AT: https://www.youtube.com/watch?v=SvfEvFpmfxA)
 
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/25271c39509898551879)
 
